@@ -9,8 +9,8 @@ export function TimeRow({
 
   return (
     <tr>
-      <td style={{ width: 40 }}>{index + 1}</td>
-      <td style={{ width: 160 }}>
+      <td>{index + 1}</td>
+      <td>
         <select
           value={row.clienteid ?? ''}
           onChange={(e) => onChange(index, { ...row, clienteid: Number(e.target.value), proyectoid: null, tareaid: null })}
@@ -20,7 +20,7 @@ export function TimeRow({
         </select>
       </td>
 
-      <td style={{ width: 160 }}>
+      <td>
         <select
           value={row.proyectoid ?? ''}
           onChange={(e)=> onChange(index, {...row, proyectoid: Number(e.target.value), tareaid: null})}
@@ -30,15 +30,15 @@ export function TimeRow({
         </select>
       </td>
 
-      <td style={{ width: 140 }}>
+      <td>
         <input
           value={row.referenciacaseware ?? ''}
           onChange={(e)=> onChange(index, {...row, referenciacaseware: e.target.value})}
-          placeholder="Ref. Caseware"
+          placeholder="Ref.Caseware"
         />
       </td>
 
-      <td style={{ width: 260 }}>
+      <td>
         <select
           value={row.tareaid ?? ''}
           onChange={(e)=> onChange(index, {...row, tareaid: Number(e.target.value)})}
@@ -48,14 +48,13 @@ export function TimeRow({
         </select>
       </td>
 
-      <td style={{ width: 80 }}>
+      <td>
         <input
           type="number"
           step="0.25"
           min="0"
           value={row.horas ?? ''}
           onChange={(e)=> onChange(index, {...row, horas: e.target.value})}
-          style={{ width: 70 }}
         />
       </td>
 
@@ -63,7 +62,7 @@ export function TimeRow({
         <input
           value={row.notasadicionales ?? ''}
           onChange={(e)=> onChange(index, {...row, notasadicionales: e.target.value})}
-          placeholder="Observaciones"
+          placeholder="Observacion"
         />
       </td>
     </tr>

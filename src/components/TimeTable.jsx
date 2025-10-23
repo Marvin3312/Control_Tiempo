@@ -28,17 +28,17 @@ export function TimeTable({
   }, [rows, tareas]);
 
   return (
-    <div>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <div className="table-responsive">
+      <table className="table">
         <thead>
           <tr style={{ textAlign: 'left' }}>
             <th>#</th>
             <th>Cliente</th>
-            <th>Período Rev. (Proyecto)</th>
-            <th>Ref. Caseware</th>
+            <th>Proyecto</th>
+            <th>Ref.Caseware</th>
             <th>Actividad</th>
             <th>Horas</th>
-            <th>Observaciones</th>
+            <th>Observacion</th>
           </tr>
         </thead>
         <tbody>
