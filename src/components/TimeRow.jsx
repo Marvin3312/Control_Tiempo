@@ -1,15 +1,15 @@
-// src/components/TimeRow.jsx
 import React from 'react';
 
-export default function TimeRow({
+export function TimeRow({
   index, row, clientes, proyectosByCliente, tareasByProyecto,
   onChange, onToggleEdit
 }) {
   const proyectos = proyectosByCliente[row.clienteid] || [];
-const tareas = tareasByProyecto[row.proyectoid] || [];
+  const tareas = tareasByProyecto[row.proyectoid] || [];
 
   return (
     <tr>
+      <td style={{ width: 40 }}>{index + 1}</td>
       <td style={{ width: 160 }}>
         <select
           value={row.clienteid ?? ''}

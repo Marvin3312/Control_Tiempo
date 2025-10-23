@@ -1,8 +1,8 @@
 // src/components/TimeTable.jsx
 import React, { useMemo } from 'react';
-import TimeRow from './TimeRow';
+import { TimeRow } from './TimeRow';
 
-export default function TimeTable({
+export function TimeTable({
   rows, setRows, clientes, proyectos, tareas, proyectosByCliente, tareasByProyecto
 }) {
   const onChange = (index, newRow) => {
@@ -32,6 +32,7 @@ export default function TimeTable({
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ textAlign: 'left' }}>
+            <th>#</th>
             <th>Cliente</th>
             <th>Período Rev. (Proyecto)</th>
             <th>Ref. Caseware</th>
@@ -55,11 +56,11 @@ export default function TimeTable({
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan={3}><strong>Total Horas Cargables:</strong></td>
+            <td colSpan={4}><strong>Total Horas Cargables:</strong></td>
             <td colSpan={3}>{totals.carg.toFixed(2)}</td>
           </tr>
           <tr>
-            <td colSpan={3}><strong>Total Horas No Cargables:</strong></td>
+            <td colSpan={4}><strong>Total Horas No Cargables:</strong></td>
             <td colSpan={3}>{totals.nocarg.toFixed(2)}</td>
           </tr>
         </tfoot>

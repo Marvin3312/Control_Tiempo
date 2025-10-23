@@ -2,10 +2,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from './supabaseClient';
 import FormHeader from './components/FormHeader';
-import TimeTable from './components/TimeTable';
+import { TimeTable } from './components/TimeTable';
 
-// Crea filas vacías para los días del mes
-function buildEmptyRows(dayCount = 1) {
+// Crea filas vacías
+function buildEmptyRows(dayCount = 1, fecha = new Date().toISOString().slice(0, 10)) {
   return Array.from({ length: dayCount }, (_, i) => ({
     id: crypto.randomUUID(),
     fila: i + 1,
@@ -15,7 +15,7 @@ function buildEmptyRows(dayCount = 1) {
     tareaid: null,
     horas: '',
     notasadicionales: '',
-    fecha: null // se asigna al guardar con periodo + dia
+    fecha: fecha
   }));
 }
 
@@ -32,7 +32,6 @@ export default function App() {
     fetchCatalogs();
   }, []);
 
-  // 🔹 Cargar catálogos (empleados, clientes, proyectos, tareas)
   async function fetchCatalogs() {
     const [{ data: emp }, { data: cli }, { data: proj }, { data: tar }] = await Promise.all([
       supabase.from('empleados').select('*'),
@@ -46,7 +45,6 @@ export default function App() {
     setTareas(tar ?? []);
   }
 
-  // 🔹 Agrupar proyectos por cliente
   const proyectosByCliente = useMemo(() => {
     const map = {};
     (proyectos || []).forEach(p => {
@@ -56,7 +54,6 @@ export default function App() {
     return map;
   }, [proyectos]);
 
-  // 🔹 Agrupar tareas por proyecto
   const tareasByProyecto = useMemo(() => {
     const map = {};
     (tareas || []).forEach(t => {
@@ -66,34 +63,26 @@ export default function App() {
     return map;
   }, [tareas]);
 
-  // 🔹 Cargar registros cuando cambie el periodo o empleado
   useEffect(() => {
     if (!form.periodo || !form.empleadoid) return;
-    loadMonthlyRecords();
+    loadDailyRecords();
   }, [form.periodo, form.empleadoid]);
 
-  // 🔹 Cargar los registros del mes seleccionado
-  async function loadMonthlyRecords() {
+  async function loadDailyRecords() {
     setLoading(true);
     try {
-      const [year, month] = form.periodo.split('-').map(Number);
-      const start = `${year}-${String(month).padStart(2, '0')}-01`;
-      const endDate = new Date(year, month, 0).getDate();
-      const end = `${year}-${String(month).padStart(2, '0')}-${String(endDate).padStart(2, '0')}`;
-
       const { data, error } = await supabase
         .from('registrosdetiempo')
         .select('*')
         .eq('empleadoid', form.empleadoid)
-        .gte('fecha', start)
-        .lte('fecha', end);
+        .eq('fecha', form.periodo);
 
       if (error) throw error;
 
       if (data && data.length) {
-        const loadedRows = data.map(d => ({
-          id: d.registroid || crypto.randomUUID(), // Use registroid if available, otherwise generate new ID
-          fila: new Date(d.fecha).getDate(),
+        const loadedRows = data.map((d, i) => ({
+          id: d.registroid || crypto.randomUUID(),
+          fila: i + 1,
           clienteid: d.clienteid ?? null,
           proyectoid: d.proyectoid ?? null,
           referenciacaseware: d.referenciacaseware ?? '',
@@ -103,10 +92,9 @@ export default function App() {
           fecha: d.fecha,
           registroid: d.registroid
         }));
-        // Append one empty row for new input
-        setRows([...loadedRows, buildEmptyRows(1)[0]]);
+        setRows([...loadedRows, buildEmptyRows(1, form.periodo)[0]]);
       } else {
-        setRows(buildEmptyRows(1)); // Just one empty row if no data
+        setRows(buildEmptyRows(1, form.periodo));
       }
     } catch (err) {
       console.error(err);
@@ -116,16 +104,14 @@ export default function App() {
     }
   }
 
-  // 🔹 Guardar registros (inserta o actualiza según corresponda)
   async function handleSave() {
-    if (!form.empleadoid || !form.periodo) {
-      alert('Seleccione empleado y periodo');
+    if (!form.empleadoid) {
+      alert('Seleccione empleado');
       return;
     }
 
     setLoading(true);
     try {
-      const [year, month] = form.periodo.split('-').map(Number);
       const toInsert = [];
       const toUpdate = [];
       let skippedRows = 0;
@@ -133,17 +119,15 @@ export default function App() {
       for (let i = 0; i < rows.length; i++) {
         const r = rows[i];
         const h = parseFloat(r.horas) || 0;
-        // Skip saving if no hours or no tareaid
-        if (h <= 0 || !r.tareaid) {
+        if (h <= 0 || !r.tareaid || !r.fecha) {
           skippedRows++;
           continue;
         }
 
-        const fecha = new Date(year, month - 1, r.fila).toISOString().slice(0, 10);
         const payload = {
           empleadoid: Number(form.empleadoid),
           tareaid: r.tareaid,
-          fecha,
+          fecha: r.fecha,
           horas: h,
           notasadicionales: r.notasadicionales || null,
           clienteid: r.clienteid ?? null,
@@ -158,13 +142,11 @@ export default function App() {
         }
       }
 
-      // 🟢 Insertar nuevos
       if (toInsert.length) {
         const { error: insErr } = await supabase.from('registrosdetiempo').insert(toInsert);
         if (insErr) throw insErr;
       }
 
-      // 🟠 Actualizar existentes
       for (const u of toUpdate) {
         const { error: updErr } = await supabase
           .from('registrosdetiempo')
@@ -175,10 +157,12 @@ export default function App() {
 
       let message = 'Registros guardados correctamente ✅';
       if (skippedRows > 0) {
-        message += ` (${skippedRows} filas omitidas por falta de Tarea)`;
+        message += ` (${skippedRows} filas omitidas por falta de Tarea o Fecha)`;
       }
       alert(message);
-      await loadMonthlyRecords();
+      if (form.periodo) {
+        await loadDailyRecords();
+      }
     } catch (err) {
       console.error('Error guardando:', err);
       alert('Error guardando: ' + err.message);
@@ -188,18 +172,7 @@ export default function App() {
   }
 
   function addRow() {
-    const newRow = {
-      id: crypto.randomUUID(),
-      fila: rows.length + 1,
-      clienteid: null,
-      proyectoid: null,
-      referenciacaseware: '',
-      tareaid: null,
-      horas: '',
-      notasadicionales: '',
-      fecha: null
-    };
-    setRows([...rows, newRow]);
+    setRows([...rows, buildEmptyRows(1, form.periodo)[0]]);
   }
 
   return (
@@ -212,7 +185,7 @@ export default function App() {
       borderRadius: 8,
       boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
     }}>
-      <h2>Gestión de Tiempo - Formato Mensual</h2>
+      <h2>Gestión de Tiempo</h2>
 
       <FormHeader empleados={empleados} form={form} setForm={setForm} />
 
@@ -236,7 +209,7 @@ export default function App() {
 
       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
         <button onClick={handleSave} disabled={loading}>Guardar (Insert / Update)</button>
-        <button onClick={() => setRows(buildEmptyRows(rows.length))}>Limpiar mes</button>
+        <button onClick={() => setRows(buildEmptyRows(1, form.periodo))}>Limpiar todo</button>
         <button onClick={addRow}>Añadir Fila</button>
         <div style={{ marginLeft: 'auto' }}>{loading ? 'Procesando...' : ''}</div>
       </div>

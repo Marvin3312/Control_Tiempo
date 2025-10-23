@@ -19,9 +19,9 @@ export default function FormHeader({ empleados, form, setForm }) {
         </div>
 
         <div>
-          <label>Periodo (YYYY-MM)</label><br/>
+          <label>Fecha</label><br/>
           <input
-            type="month"
+            type="date"
             value={form.periodo ?? ''}
             onChange={(e) => setForm({...form, periodo: e.target.value})}
           />
