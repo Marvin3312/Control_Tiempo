@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from './supabaseClient';
 import FormHeader from './components/FormHeader';
 import { TimeTable } from './components/TimeTable';
+import { Notification } from './components/Notification';
 
 // Crea filas vacías
 function buildEmptyRows(dayCount = 1, fecha = new Date().toISOString().slice(0, 10)) {
@@ -27,6 +28,11 @@ export default function App() {
   const [rows, setRows] = useState(buildEmptyRows(1));
   const [form, setForm] = useState({ empleadoid: '', periodo: '', departamento: '', puesto: '' });
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({ message: '', type: '' });
+
+  function showNotification(message, type) {
+    setNotification({ message, type });
+  }
 
   useEffect(() => {
     fetchCatalogs();
@@ -98,7 +104,7 @@ export default function App() {
       }
     } catch (err) {
       console.error(err);
-      alert('Error cargando registros: ' + err.message);
+      showNotification('Error cargando registros: ' + err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -106,7 +112,7 @@ export default function App() {
 
   async function handleSave() {
     if (!form.empleadoid) {
-      alert('Seleccione empleado');
+      showNotification('Seleccione empleado', 'error');
       return;
     }
 
@@ -159,13 +165,13 @@ export default function App() {
       if (skippedRows > 0) {
         message += ` (${skippedRows} filas omitidas por falta de Tarea o Fecha)`;
       }
-      alert(message);
+      showNotification(message, 'success');
       if (form.periodo) {
         await loadDailyRecords();
       }
     } catch (err) {
       console.error('Error guardando:', err);
-      alert('Error guardando: ' + err.message);
+      showNotification('Error guardando: ' + err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -185,6 +191,11 @@ export default function App() {
       borderRadius: 8,
       boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
     }}>
+      <Notification 
+        message={notification.message} 
+        type={notification.type} 
+        onClose={() => setNotification({ message: '', type: '' })} 
+      />
       <h2>Gestión de Tiempo</h2>
 
       <FormHeader empleados={empleados} form={form} setForm={setForm} />
