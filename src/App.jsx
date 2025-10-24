@@ -4,6 +4,7 @@ import { supabase } from './supabaseClient';
 import FormHeader from './components/FormHeader';
 import { TimeTable } from './components/TimeTable';
 import { Notification } from './components/Notification';
+import AuthSimple from './AuthSimple';
 
 // Crea filas vacías
 function buildEmptyRows(dayCount = 1, fecha = new Date().toISOString().slice(0, 10)) {
@@ -21,7 +22,8 @@ function buildEmptyRows(dayCount = 1, fecha = new Date().toISOString().slice(0, 
 }
 
 export default function App() {
-  const [empleados, setEmpleados] = useState([]);
+  const [session, setSession] = useState(null);
+  const [empleadoProfile, setEmpleadoProfile] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [proyectos, setProyectos] = useState([]);
   const [tareas, setTareas] = useState([]);
@@ -35,17 +37,62 @@ export default function App() {
   }
 
   useEffect(() => {
-    fetchCatalogs();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    async function fetchEmpleadoProfile() {
+      if (session?.user) {
+        const { data, error } = await supabase
+          .from('empleados')
+          .select('*, puestos(nombrepuesto), departamentos(nombredepto)')
+          .eq('usuario_id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching empleado profile:', error);
+          setEmpleadoProfile(null);
+        } else if (data) {
+          setEmpleadoProfile({
+            ...data,
+            puesto: data.puestos.nombrepuesto,
+            departamento: data.departamentos.nombredepto,
+          });
+          setForm(prevForm => ({
+            ...prevForm,
+            empleadoid: data.empleadoid,
+            departamento: data.departamentos.nombredepto,
+            puesto: data.puestos.nombrepuesto,
+          }));
+        }
+      } else {
+        setEmpleadoProfile(null);
+        setForm({ empleadoid: '', periodo: '', departamento: '', puesto: '' });
+      }
+    }
+    fetchEmpleadoProfile();
+  }, [session]);
+
+  useEffect(() => {
+    if (empleadoProfile) {
+      fetchCatalogs();
+    }
+  }, [empleadoProfile]);
+
   async function fetchCatalogs() {
-    const [{ data: emp }, { data: cli }, { data: proj }, { data: tar }] = await Promise.all([
-      supabase.from('empleados').select('*'),
+    const [{ data: cli }, { data: proj }, { data: tar }] = await Promise.all([
       supabase.from('clientes').select('*'),
       supabase.from('proyectos').select('*'),
       supabase.from('tareas').select('*')
     ]);
-    setEmpleados(emp ?? []);
     setClientes(cli ?? []);
     setProyectos(proj ?? []);
     setTareas(tar ?? []);
@@ -70,9 +117,9 @@ export default function App() {
   }, [tareas]);
 
   useEffect(() => {
-    if (!form.periodo || !form.empleadoid) return;
+    if (!form.periodo || !empleadoProfile?.empleadoid) return;
     loadDailyRecords();
-  }, [form.periodo, form.empleadoid]);
+  }, [form.periodo, empleadoProfile?.empleadoid]);
 
   async function loadDailyRecords() {
     setLoading(true);
@@ -80,7 +127,7 @@ export default function App() {
       const { data, error } = await supabase
         .from('registrosdetiempo')
         .select('*')
-        .eq('empleadoid', form.empleadoid)
+        .eq('empleadoid', empleadoProfile.empleadoid)
         .eq('fecha', form.periodo);
 
       if (error) throw error;
@@ -111,8 +158,8 @@ export default function App() {
   }
 
   async function handleSave() {
-    if (!form.empleadoid) {
-      showNotification('Seleccione empleado', 'error');
+    if (!empleadoProfile?.empleadoid) {
+      showNotification('Empleado no autenticado o no vinculado.', 'error');
       return;
     }
 
@@ -131,7 +178,7 @@ export default function App() {
         }
 
         const payload = {
-          empleadoid: Number(form.empleadoid),
+          empleadoid: empleadoProfile.empleadoid,
           tareaid: r.tareaid,
           fecha: r.fecha,
           horas: h,
@@ -181,6 +228,43 @@ export default function App() {
     setRows([...rows, buildEmptyRows(1, form.periodo)[0]]);
   }
 
+  if (!session) {
+    return (
+      <div id="main-container" style={{
+        padding: '40px 20px 20px 20px',
+        fontFamily: 'system-ui, Arial',
+        maxWidth: 1200,
+        margin: '0 auto',
+        backgroundColor: '#f0f2f5',
+        borderRadius: 8,
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+      }}>
+        <AuthSimple />
+      </div>
+    );
+  }
+
+  if (!empleadoProfile) {
+    return (
+      <div id="main-container" style={{
+        padding: '40px 20px 20px 20px',
+        fontFamily: 'system-ui, Arial',
+        maxWidth: 1200,
+        margin: '0 auto',
+        backgroundColor: '#f0f2f5',
+        borderRadius: 8,
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+      }}>
+        <Notification 
+          message="Acceso Denegado: Tu usuario no está vinculado a un empleado." 
+          type="error" 
+          onClose={() => {}} 
+        />
+        <button onClick={() => supabase.auth.signOut()} className="btn btn-danger mt-3">Cerrar Sesión</button>
+      </div>
+    );
+  }
+
   return (
     <div id="main-container" style={{
       padding: '40px 20px 20px 20px',
@@ -196,9 +280,12 @@ export default function App() {
         type={notification.type} 
         onClose={() => setNotification({ message: '', type: '' })} 
       />
-      <h2>Gestión de Tiempo</h2>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Gestión de Tiempo</h2>
+        <button onClick={() => supabase.auth.signOut()} className="btn btn-outline-secondary">Cerrar Sesión</button>
+      </div>
 
-      <FormHeader empleados={empleados} form={form} setForm={setForm} />
+      <FormHeader empleados={[]} form={form} setForm={setForm} />
 
       <div style={{ marginBottom: 12 }}>
         <label>Clientes / Proyectos / Tareas</label>
@@ -216,6 +303,7 @@ export default function App() {
         tareas={tareas}
         proyectosByCliente={proyectosByCliente}
         tareasByProyecto={tareasByProyecto}
+        empleadoProfile={empleadoProfile}
       />
 
       <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
