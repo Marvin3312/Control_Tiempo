@@ -71,6 +71,7 @@ export default function App() {
             empleadoid: data.empleadoid,
             departamento: data.departamentos.nombredepto,
             puesto: data.puestos.nombrepuesto,
+            nombrecompleto: data.nombrecompleto,
           }));
         }
       } else {

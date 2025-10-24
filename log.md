@@ -2,7 +2,7 @@
 
 ### 24 de octubre de 2025
 
-#### 1. Modificación de `src/components/FormHeader.jsx`
+#### 1. Modificación de `src/components/FormHeader.jsx` (Inicial)
 
 **Descripción:** Se modificaron los campos de entrada de texto para "Departamento" y "Puesto" a elementos `<select>` (listas desplegables).
 
@@ -29,7 +29,7 @@
   - Se añadieron estados para `session` (sesión de Supabase) y `empleadoProfile` (perfil del empleado vinculado).
   - Se configuró un `useEffect` para escuchar los cambios en el estado de autenticación de Supabase (`onAuthStateChange`).
   - Cuando un usuario inicia sesión, se intenta buscar un `empleadoProfile` en la tabla `empleados` que esté vinculado al `usuario_id` del usuario autenticado. Se obtienen también los nombres de puesto y departamento mediante `select` con relaciones.
-  - Si se encuentra un `empleadoProfile`, se actualiza el estado del formulario (`form.empleadoid`, `form.departamento`, `form.puesto`) con los datos del empleado.
+  - Si se encuentra un `empleadoProfile`, se actualiza el estado del formulario (`form.empleadoid`, `form.departamento`, `form.puesto`, `form.nombrecompleto`) con los datos del empleado.
   - La renderización del componente `App` ahora es condicional:
     - Si no hay `session`, se muestra el componente `AuthSimple`.
     - Si hay `session` pero no se encuentra un `empleadoProfile` vinculado, se muestra un mensaje de "Acceso Denegado" y un botón para cerrar sesión.
@@ -37,6 +37,14 @@
   - Se ajustaron las llamadas a `fetchCatalogs` y `loadDailyRecords` para que dependan de la existencia de un `empleadoProfile`.
   - Se eliminó la prop `empleados` del componente `FormHeader` ya que la selección de empleado ahora se gestiona a través de la autenticación.
   - Se añadió un botón de "Cerrar Sesión" en la cabecera de la aplicación principal.
+
+#### 3. Modificación de `src/components/FormHeader.jsx` (Final)
+
+**Descripción:** Se modificó el `FormHeader` para mostrar el nombre completo del empleado autenticado en lugar de un selector de empleados.
+
+**Implementación:**
+- Se reemplazó el elemento `<select>` para la selección de empleados por un `div` con la clase `form-control-plaintext`.
+- Este `div` ahora muestra el valor de `form.nombrecompleto`, que es el nombre del empleado que ha iniciado sesión.
 
 **Próximos Pasos:**
 - Verificar el funcionamiento de la aplicación con los cambios implementados.

@@ -37,18 +37,10 @@ export default function FormHeader({ empleados, form, setForm }) {
     <div className="container-fluid mb-3">
       <div className="row">
         <div className="col-md-3 mb-3">
-          <label htmlFor="empleadoSelect" className="form-label">Empleado</label>
-          <select
-            id="empleadoSelect"
-            className="form-select"
-            value={form.empleadoid ?? ''}
-            onChange={(e) => setForm({...form, empleadoid: Number(e.target.value)})}
-          >
-            <option value="">-- Seleccione empleado --</option>
-            {empleados.map(emp => (
-              <option key={emp.empleadoid} value={emp.empleadoid}>{emp.nombrecompleto}</option>
-            ))}
-          </select>
+          <label htmlFor="empleadoDisplay" className="form-label">Empleado</label>
+          <div id="empleadoDisplay" className="form-control-plaintext">
+            {form.nombrecompleto || 'N/A'}
+          </div>
         </div>
 
         <div className="col-md-3 mb-3">
