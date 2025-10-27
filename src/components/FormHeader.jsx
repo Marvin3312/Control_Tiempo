@@ -63,7 +63,7 @@ export default function FormHeader({ empleados, form, setForm }) {
             value={form.departamento ?? ''}
             onChange={(e) => setForm({...form, departamento: e.target.value})}
           >
-            <option value="">-- Seleccione departamento --</option>
+            <option value="">Seleccione departamento</option>
             {departamentos.map(depto => (
               <option key={depto.departamentoid} value={depto.nombredepto}>{depto.nombredepto}</option>
             ))}

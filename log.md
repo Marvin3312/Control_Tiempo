@@ -46,5 +46,17 @@
 - Se reemplazó el elemento `<select>` para la selección de empleados por un `div` con la clase `form-control-plaintext`.
 - Este `div` ahora muestra el valor de `form.nombrecompleto`, que es el nombre del empleado que ha iniciado sesión.
 
+#### 4. Mejoras en `src/AuthSimple.jsx`
+
+**Descripción:** Se mejoró la experiencia de usuario en el formulario de inicio de sesión, reemplazando las alertas nativas por el componente `Notification` y aplicando estilos visuales para un diseño más atractivo.
+
+**Implementación:**
+- Se importó el componente `Notification` y se gestionó su estado localmente para mostrar mensajes de éxito o error.
+- Se eliminaron las llamadas a `alert()` y se reemplazaron por `showNotification()`.
+- Se aplicaron estilos CSS para centrar el formulario en la pantalla, utilizando clases de Bootstrap (`d-flex`, `justify-content-center`, `align-items-center`, `minHeight: '100vh'`).
+- Se añadió un `div` con la clase `card` y `shadow-sm` para darle un aspecto de tarjeta al formulario, con `padding` y `max-width` definidos.
+- Se centraron los títulos y párrafos dentro del formulario (`text-center`).
+- El botón de envío ahora ocupa todo el ancho (`w-100`).
+
 **Próximos Pasos:**
 - Verificar el funcionamiento de la aplicación con los cambios implementados.
