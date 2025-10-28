@@ -1,71 +1,74 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [loading, setLoading] = useState(true);
   const [session, setSession] = useState(null);
   const [perfilEmpleado, setPerfilEmpleado] = useState(null);
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession()
-      .then(async ({ data: { session } }) => {
-        setSession(session);
-        if (session) {
-          const { data, error } = await supabase
-            .from('empleados')
-            .select('*, departamentos(nombredepto), puestos(nombrepuesto)')
-            .eq('usuario_id', session.user.id)
-            .single();
-          if (error && error.code !== 'PGRST116') {
-            console.error('Error buscando perfil:', error);
-          }
-          setPerfilEmpleado(data || null);
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error getting session:", error);
-        setLoading(false);
-      });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
-      if (session) {
-        const { data, error } = await supabase
-          .from('empleados')
-          .select('*, departamentos(nombredepto), puestos(nombrepuesto)')
-          .eq('usuario_id', session.user.id)
-          .single();
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error buscando perfil:', error);
-        }
-        setPerfilEmpleado(data || null);
-      } else {
-        setPerfilEmpleado(null);
-      }
+      setLoading(false);
+    };
+
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    setSession(null);
-    setPerfilEmpleado(null);
-  }
+  useEffect(() => {
+    const fetchPerfilEmpleado = async () => {
+      if (session?.user) {
+        setLoadingProfile(true);
+        const { data, error } = await supabase
+          .from('empleados')
+          .select('*, puestos(nombrepuesto), departamentos(nombredepto)')
+          .eq('usuario_id', session.user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching empleado profile:', error);
+          setPerfilEmpleado(null);
+          setRole(null);
+        } else {
+          setPerfilEmpleado(data);
+          if (data.puestos) {
+            setRole(data.puestos.nombrepuesto);
+          }
+        }
+        setLoadingProfile(false);
+      } else {
+        setPerfilEmpleado(null);
+        setRole(null);
+      }
+    };
+
+    fetchPerfilEmpleado();
+  }, [session]);
 
   const value = {
     session,
     perfilEmpleado,
-    loading,
-    handleLogout,
-    role: perfilEmpleado?.role,
+    role,
+    loadingProfile,
+    handleLogout: () => supabase.auth.signOut(),
   };
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

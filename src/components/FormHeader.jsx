@@ -27,10 +27,20 @@ export default function FormHeader({ empleados, form, setForm }) {
   }, []);
 
   const handleDateChange = (date) => {
-    setForm({
-      ...form,
-      periodo: date ? date.toISOString().split('T')[0] : '',
-    });
+    if (date) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        setForm({
+            ...form,
+            periodo: `${year}-${month}-${day}`,
+        });
+    } else {
+        setForm({
+            ...form,
+            periodo: '',
+        });
+    }
   };
 
   return (
@@ -48,7 +58,7 @@ export default function FormHeader({ empleados, form, setForm }) {
            <br/>
           <DatePicker
             id="fechaInput"
-            selected={form.periodo ? new Date(form.periodo) : null}
+            selected={form.periodo ? new Date(form.periodo.replace(/-/g, '/')) : null}
             onChange={handleDateChange}
             dateFormat="yyyy-MM-dd"
             className="form-control"

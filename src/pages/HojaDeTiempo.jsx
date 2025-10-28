@@ -5,14 +5,29 @@ import FormHeader from '../components/FormHeader';
 import { TimeTable } from '../components/TimeTable';
 import { Notification } from '../components/Notification';
 
+function buildEmptyRows(dayCount = 1, fecha = new Date().toISOString().slice(0, 10)) {
+  return Array.from({ length: dayCount }, (_, i) => ({
+    id: crypto.randomUUID(),
+    fila: i + 1,
+    clienteid: null,
+    proyectoid: null,
+    referenciacaseware: '',
+    tareaid: null,
+    horas: '',
+    notasadicionales: '',
+    fecha: fecha
+  }));
+}
+
 function HojaDeTiempo() {
   const { perfilEmpleado } = useAuth();
   const [form, setForm] = useState({});
-  const [rows, setRows] = useState([{}]);
+  const [rows, setRows] = useState(buildEmptyRows(1));
   const [clientes, setClientes] = useState([]);
   const [proyectos, setProyectos] = useState([]);
   const [tareas, setTareas] = useState([]);
   const [notification, setNotification] = useState({ message: '', type: '' });
+  const [isSaving, setIsSaving] = useState(false);
 
   function showNotification(message, type) {
     setNotification({ message, type });
@@ -56,11 +71,11 @@ function HojaDeTiempo() {
   }, [perfilEmpleado]);
 
   const handleAddRow = () => {
-    setRows([...rows, {}]);
+    setRows([...rows, buildEmptyRows(1, form.periodo)[0]]);
   };
 
   const handleClear = () => {
-    setRows([{}]);
+    setRows(buildEmptyRows(1, form.periodo));
   };
 
   const handleSave = async () => {
@@ -68,6 +83,8 @@ function HojaDeTiempo() {
       showNotification('No se pudo identificar al empleado.', 'error');
       return;
     }
+
+    setIsSaving(true);
 
     const recordsToSave = rows
       .filter(row => row.tareaid && row.horas > 0)
@@ -84,15 +101,23 @@ function HojaDeTiempo() {
 
     if (recordsToSave.length === 0) {
       showNotification('No hay filas válidas para guardar.', 'warning');
+      setIsSaving(false);
       return;
     }
 
-    const { error } = await supabase.from('registrosdetiempo').upsert(recordsToSave);
+    try {
+      const { error } = await supabase.from('registrosdetiempo').upsert(recordsToSave);
 
-    if (error) {
+      if (error) {
+        showNotification(`Error al guardar: ${error.message}`, 'error');
+      } else {
+        showNotification('¡Datos guardados con éxito!', 'success');
+        setRows(buildEmptyRows(1, form.periodo));
+      }
+    } catch (error) {
       showNotification(`Error al guardar: ${error.message}`, 'error');
-    } else {
-      showNotification('¡Datos guardados con éxito!', 'success');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -119,7 +144,9 @@ function HojaDeTiempo() {
           <button className="btn btn-danger ms-2" onClick={handleClear}>Limpiar</button>
         </div>
         <div>
-          <button className="btn btn-success" onClick={handleSave}>Enviar Definitivo</button>
+          <button className="btn btn-success" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? 'Enviando...' : 'Enviar Definitivo'}
+          </button>
         </div>
       </div>
     </div>
