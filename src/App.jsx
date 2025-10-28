@@ -8,6 +8,7 @@ import NotFound from './pages/NotFound';
 import LayoutPrincipal from './components/LayoutPrincipal';
 import DashboardKPIs from './pages/DashboardKPIs';
 import Reportes from './pages/Reportes';
+import PanelDeControl from './pages/PanelDeControl';
 
 function RutaProtegida({ children }) {
   const { session, perfilEmpleado, loadingProfile } = useAuth();
@@ -45,6 +46,7 @@ export default function App() {
             <Route index element={<HojaDeTiempo />} />
             <Route path="dashboard" element={<DashboardKPIs />} />
             <Route path="reportes" element={<Reportes />} />
+            <Route path="panel-de-control" element={<PanelDeControl />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

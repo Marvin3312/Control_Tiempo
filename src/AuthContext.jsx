@@ -42,8 +42,8 @@ export function AuthProvider({ children }) {
           setRole(null);
         } else {
           setPerfilEmpleado(data);
-          if (data.puestos) {
-            setRole(data.puestos.nombrepuesto);
+          if (data.role) {
+            setRole(data.role);
           }
         }
         setLoadingProfile(false);

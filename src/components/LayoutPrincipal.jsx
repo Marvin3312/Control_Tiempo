@@ -16,6 +16,9 @@ function LayoutPrincipal() {
           {(role === 'admin' || role === 'tecnico') && (
             <Link to="/dashboard" style={{ marginRight: '10px' }}>Dashboard</Link>
           )}
+          {(role === 'admin' || role === 'tecnico') && (
+            <Link to="/panel-de-control" style={{ marginRight: '10px' }}>Panel de control</Link>
+          )}
           {(role === 'admin' || role === 'tecnico' || role === 'gerente') && (
             <Link to="/reportes" style={{ marginRight: '10px' }}>Reportes</Link>
           )}
