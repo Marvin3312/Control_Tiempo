@@ -25,7 +25,8 @@ function HojaDeTiempo() {
   const [rows, setRows] = useState(buildEmptyRows(1));
   const [clientes, setClientes] = useState([]);
   const [proyectos, setProyectos] = useState([]);
-  const [tareas, setTareas] = useState([]);
+  const [groupedTareas, setGroupedTareas] = useState([]);
+  const [allTareas, setAllTareas] = useState([]);
   const [notification, setNotification] = useState({ message: '', type: '' });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -35,29 +36,59 @@ function HojaDeTiempo() {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: clientesData, error: clientesError } = await supabase.from('clientes').select('*');
+      // 1. Fetch all clients and projects (for lookups)
+      const { data: clientesData } = await supabase.from('clientes').select('*');
       if (clientesData) setClientes(clientesData);
 
-      const { data: proyectosData, error: proyectosError } = await supabase.from('proyectos').select('*');
+      const { data: proyectosData } = await supabase.from('proyectos').select('*');
       if (proyectosData) setProyectos(proyectosData);
 
-      const { data: tareasData, error: tareasError } = await supabase.from('tareas').select('*');
-      if (tareasData) setTareas(tareasData);
+      // 2. Fetch tasks based on the new logic
+      const { data: oficina } = await supabase
+          .from('proyectos')
+          .select('proyectoid')
+          .eq('referenciacaseware', 'OFICINA-INT')
+          .single();
+
+      const { data: tareasNoCargables } = await supabase
+          .from('tareas')
+          .select('*, proyectos!inner(proyectoid, nombreproyecto, clienteid, referenciacaseware)')
+          .eq('proyectoid', oficina.proyectoid);
+
+      const { data: tareasCargables } = await supabase
+          .from('tareas')
+          .select('*, proyectos!inner(proyectoid, nombreproyecto, clienteid, referenciacaseware)')
+          .neq('proyectoid', oficina.proyectoid);
+      
+      const allTasks = [...(tareasNoCargables || []), ...(tareasCargables || [])];
+      setAllTareas(allTasks);
+
+      // 3. Group tasks for the dropdown
+      const grouped = allTasks.reduce((acc, tarea) => {
+          const project = tarea.proyectos;
+          if (!project) return acc;
+
+          if (!acc[project.proyectoid]) {
+              acc[project.proyectoid] = {
+                  label: project.nombreproyecto,
+                  proyectoid: project.proyectoid,
+                  options: []
+              };
+          }
+          acc[project.proyectoid].options.push({
+              value: tarea.tareaid,
+              label: tarea.descripciontarea,
+              proyectoid: project.proyectoid,
+              clienteid: project.clienteid,
+              referenciacaseware: project.referenciacaseware,
+          });
+          return acc;
+      }, {});
+
+      setGroupedTareas(Object.values(grouped));
     }
     fetchData();
   }, []);
-
-  const proyectosByCliente = useMemo(() => proyectos.reduce((acc, p) => {
-    if (!acc[p.clienteid]) acc[p.clienteid] = [];
-    acc[p.clienteid].push(p);
-    return acc;
-  }, {}), [proyectos]);
-
-  const tareasByProyecto = useMemo(() => tareas.reduce((acc, t) => {
-    if (!acc[t.proyectoid]) acc[t.proyectoid] = [];
-    acc[t.proyectoid].push(t);
-    return acc;
-  }, {}), [tareas]);
 
   useEffect(() => {
     if (perfilEmpleado) {
@@ -134,9 +165,8 @@ function HojaDeTiempo() {
         setRows={setRows}
         clientes={clientes}
         proyectos={proyectos}
-        tareas={tareas}
-        proyectosByCliente={proyectosByCliente}
-        tareasByProyecto={tareasByProyecto}
+        groupedTareas={groupedTareas}
+        allTareas={allTareas}
       />
       <div className="mt-3 d-flex justify-content-between">
         <div>

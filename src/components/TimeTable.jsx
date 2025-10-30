@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { TimeRow } from './TimeRow';
 
 export function TimeTable({
-  rows, setRows, clientes, proyectos, tareas, proyectosByCliente, tareasByProyecto
+  rows, setRows, clientes, proyectos, groupedTareas, allTareas
 }) {
   const onChange = (index, newRow) => {
     const copy = [...rows];
@@ -15,17 +15,14 @@ export function TimeTable({
   const totals = useMemo(() => {
     let carg = 0, nocarg = 0;
     for (const r of rows) {
-      const t = tareas.find(tt => tt.tareaid === r.tareaid);
+      const t = allTareas.find(tt => tt.tareaid === r.tareaid); // Use allTareas now
       const h = parseFloat(r.horas) || 0;
       if (t) {
         if (t.escargable) carg += h; else nocarg += h;
-      } else {
-        // if no task selected, assume cargable by default
-        carg += h;
       }
     }
     return { carg, nocarg };
-  }, [rows, tareas]);
+  }, [rows, allTareas]);
 
   return (
     <div className="table-responsive">
@@ -48,8 +45,8 @@ export function TimeTable({
               index={i}
               row={r}
               clientes={clientes}
-              proyectosByCliente={proyectosByCliente}
-              tareasByProyecto={tareasByProyecto}
+              proyectos={proyectos}
+              groupedTareas={groupedTareas}
               onChange={onChange}
             />
           ))}
