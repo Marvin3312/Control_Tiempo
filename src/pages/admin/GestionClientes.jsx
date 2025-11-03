@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import AdminTable from '../../components/AdminTable';
-import AdminModal from '../../components/AdminModal';
-import ClientForm from '../../components/ClientForm';
+import AdminTable from '../../components/common/AdminTable';
+import AdminModal from '../../components/common/AdminModal';
+import ClientForm from '../../components/forms/ClientForm';
 
 export default function GestionClientes() {
   const [clientes, setClientes] = useState([]);
@@ -17,7 +17,7 @@ export default function GestionClientes() {
         setLoading(true);
         const { data, error } = await supabase
           .from('clientes')
-          .select('*');
+          .select('clienteid, nombrecliente, parentclienteid'); // Select specific columns
 
         if (error) {
           throw error;
@@ -40,18 +40,18 @@ export default function GestionClientes() {
   };
 
   const handleDelete = async (cliente) => {
-    if (window.confirm(`¿Está seguro de que desea eliminar a ${cliente.nombre}?`)) {
+    if (window.confirm(`¿Está seguro de que desea eliminar a ${cliente.nombrecliente}?`)) {
       try {
         const { error } = await supabase
           .from('clientes')
           .delete()
-          .eq('id', cliente.id);
+          .eq('clienteid', cliente.clienteid); // Use clienteid
 
         if (error) {
           throw error;
         }
 
-        setClientes(clientes.filter((c) => c.id !== cliente.id));
+        setClientes(clientes.filter((c) => c.clienteid !== cliente.clienteid)); // Use clienteid
       } catch (error) {
         console.error('Error deleting client:', error);
         // TODO: Show notification to user
@@ -77,7 +77,7 @@ export default function GestionClientes() {
         result = await supabase
           .from('clientes')
           .update(formData)
-          .eq('id', editingClient.id)
+          .eq('clienteid', editingClient.clienteid) // Use clienteid
           .select();
       } else {
         // Insert
@@ -94,7 +94,7 @@ export default function GestionClientes() {
       }
 
       if (editingClient) {
-        setClientes(clientes.map(c => c.id === editingClient.id ? data[0] : c));
+        setClientes(clientes.map(c => c.clienteid === editingClient.clienteid ? data[0] : c)); // Use clienteid
       } else {
         setClientes([...clientes, data[0]]);
       }
@@ -107,11 +107,9 @@ export default function GestionClientes() {
   };
 
   const columns = [
-    { key: 'id', header: 'ID' },
-    { key: 'nombre', header: 'Nombre' },
-    { key: 'identificacion', header: 'Identificación' },
-    { key: 'email', header: 'Email' },
-    { key: 'telefono', header: 'Teléfono' },
+    { key: 'clienteid', header: 'ID' },
+    { key: 'nombrecliente', header: 'Nombre' },
+    { key: 'parentclienteid', header: 'ID Cliente Padre' },
   ];
 
   if (loading) return <p>Cargando clientes...</p>;

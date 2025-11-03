@@ -17,7 +17,16 @@ export default function AdminLayout() {
           <li className="nav-item">
             <NavLink to="/admin/tareas" className="nav-link">Tareas</NavLink>
           </li>
-          {/* Add other admin links here */}
+        </ul>
+        <hr />
+        <h4 className="px-3 py-2">Sistema de repote</h4>
+        <ul className="nav flex-column">
+            <li className="nav-item">
+                <NavLink to="/" className="nav-link">Hoja Tiempo</NavLink>
+            </li> 
+            <li className="nav-item">
+                <NavLink to="/panel-de-control" className="nav-link">Dashboard</NavLink>
+            </li>
         </ul>
       </nav>
       <main className="admin-content">

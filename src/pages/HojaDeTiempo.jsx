@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../AuthContext';
-import FormHeader from '../components/FormHeader';
-import { TimeTable } from '../components/TimeTable';
-import { Notification } from '../components/Notification';
+import { TimeTable } from '../components/timetable/TimeTable';
+import { Notification } from '../components/common/Notification';
+import { FormHeader } from '../components/FormHeader';
 
 function buildEmptyRows(dayCount = 1, fecha = new Date().toISOString().slice(0, 10)) {
   return Array.from({ length: dayCount }, (_, i) => ({
@@ -92,14 +92,22 @@ function HojaDeTiempo() {
 
   useEffect(() => {
     if (perfilEmpleado) {
+      const initialDate = new Date().toISOString().split('T')[0];
       setForm({
         nombrecompleto: perfilEmpleado.nombrecompleto,
         departamento: perfilEmpleado.departamentos?.nombredepto,
         puesto: perfilEmpleado.puestos?.nombrepuesto,
-        periodo: new Date().toISOString().split('T')[0],
+        periodo: initialDate,
       });
+      setRows(buildEmptyRows(1, initialDate));
     }
   }, [perfilEmpleado]);
+
+  useEffect(() => {
+    if (form.periodo) {
+      setRows(currentRows => currentRows.map(row => ({ ...row, fecha: form.periodo })));
+    }
+  }, [form.periodo]);
 
   const handleAddRow = () => {
     setRows([...rows, buildEmptyRows(1, form.periodo)[0]]);
@@ -159,7 +167,7 @@ function HojaDeTiempo() {
         type={notification.type} 
         onClose={() => setNotification({ message: '', type: '' })} 
       />
-      <FormHeader form={form} setForm={setForm} />
+      <FormHeader form={form} setForm={setForm} isSaving={isSaving} />
       <TimeTable
         rows={rows}
         setRows={setRows}

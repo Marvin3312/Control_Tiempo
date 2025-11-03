@@ -12,12 +12,10 @@ import Reportes from './pages/Reportes';
 import PanelDeControl from './pages/PanelDeControl';
 
 // Layout Imports
-import LayoutPrincipal from './components/LayoutPrincipal';
+import LayoutPrincipal from './components/layout/LayoutPrincipal';
 import AdminLayout from './pages/admin/AdminLayout';
-
-// Route Protection Imports
-import RutaProtegida from './components/RutaProtegida';
-import RutaProtegidaAdmin from './components/RutaProtegidaAdmin';
+import RutaProtegida from './components/auth/RutaProtegida';
+import RutaProtegidaAdmin from './components/auth/RutaProtegidaAdmin';
 
 // Admin Page Imports
 import GestionClientes from './pages/admin/GestionClientes';

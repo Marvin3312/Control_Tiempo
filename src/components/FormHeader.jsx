@@ -1,98 +1,48 @@
-// src/components/FormHeader.jsx
-import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
-import { supabase } from '../supabaseClient';
 
-export default function FormHeader({ empleados, form, setForm }) {
-  const [departamentos, setDepartamentos] = useState([]);
-  const [puestos, setPuestos] = useState([]);
+import React from 'react';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { es } from 'date-fns/locale/es';
 
-  useEffect(() => {
-    async function fetchDepartamentos() {
-      const { data, error } = await supabase.from('departamentos').select('*');
-      if (!error) {
-        setDepartamentos(data);
-      }
-    }
+registerLocale('es', es);
 
-    async function fetchPuestos() {
-      const { data, error } = await supabase.from('puestos').select('*');
-      if (!error) {
-        setPuestos(data);
-      }
-    }
-
-    fetchDepartamentos();
-    fetchPuestos();
-  }, []);
-
+export function FormHeader({ form, setForm, isSaving }) {
   const handleDateChange = (date) => {
-    if (date) {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        setForm({
-            ...form,
-            periodo: `${year}-${month}-${day}`,
-        });
-    } else {
-        setForm({
-            ...form,
-            periodo: '',
-        });
-    }
+    const formattedDate = date.toISOString().split('T')[0];
+    setForm(prevForm => ({
+      ...prevForm,
+      periodo: formattedDate
+    }));
   };
 
+  // The form.periodo is a string in 'YYYY-MM-DD' format. 
+  // DatePicker's selected prop needs a Date object or null.
+  // We need to handle the case where form.periodo is not set yet.
+  const selectedDate = form.periodo ? new Date(form.periodo) : null;
+
   return (
-    <div className="container-fluid mb-3">
-      <div className="row">
-        <div className="col-md-3 mb-3">
-          <label htmlFor="empleadoDisplay" className="form-label">Empleado</label>
-          <div id="empleadoDisplay" className="form-control-plaintext">
-            {form.nombrecompleto || 'N/A'}
+    <div className="card mb-4">
+      <div className="card-header">
+        <h2 className="h5 mb-0">Hoja de Tiempo</h2>
+      </div>
+      <div className="card-body">
+        <div className="row">
+          <div className="col-md-4">
+            <p><strong>Nombre:</strong> {form.nombrecompleto || 'Cargando...'}</p>
+            <p><strong>Departamento:</strong> {form.departamento || 'Cargando...'}</p>
+            <p><strong>Puesto:</strong> {form.puesto || 'Cargando...'}</p>
           </div>
-        </div>
-
-        <div className="col-md-3 mb-3">
-           <label htmlFor="fechaInput" className="form-label">Fecha</label>
-           <br/>
-          <DatePicker
-            id="fechaInput"
-            selected={form.periodo ? new Date(form.periodo.replace(/-/g, '/')) : null}
-            onChange={handleDateChange}
-            dateFormat="yyyy-MM-dd"
-            className="form-control"
-          />
-        </div>
-
-        <div className="col-md-3 mb-3">
-          <label htmlFor="departamentoSelect" className="form-label">Departamento</label>
-          <select
-            id="departamentoSelect"
-            className="form-select"
-            value={form.departamento ?? ''}
-            onChange={(e) => setForm({...form, departamento: e.target.value})}
-          >
-            <option value="">-- Seleccione departamento --</option>
-            {departamentos.map(depto => (
-              <option key={depto.departamentoid} value={depto.nombredepto}>{depto.nombredepto}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="col-md-3 mb-3">
-          <label htmlFor="puestoSelect" className="form-label">Puesto</label>
-          <select
-            id="puestoSelect"
-            className="form-select"
-            value={form.puesto ?? ''}
-            onChange={(e) => setForm({...form, puesto: e.target.value})}
-          >
-            <option value="">-- Seleccione puesto --</option>
-            {puestos.map(puesto => (
-              <option key={puesto.puestoid} value={puesto.nombrepuesto}>{puesto.nombrepuesto}</option>
-            ))}
-          </select>
+          <div className="col-md-4 d-flex align-items-center">
+            <label htmlFor="periodo" className="form-label me-2"><strong>Periodo:</strong></label>
+            <DatePicker
+              id="periodo"
+              selected={selectedDate}
+              onChange={handleDateChange}
+              className="form-control"
+              dateFormat="dd/MM/yyyy"
+              locale="es"
+              disabled={isSaving}
+            />
+          </div>
         </div>
       </div>
     </div>

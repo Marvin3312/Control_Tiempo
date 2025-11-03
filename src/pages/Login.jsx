@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { Notification } from '../components/Notification';
+import { Notification } from '../components/common/Notification';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import AdminTable from '../../components/AdminTable';
-import AdminModal from '../../components/AdminModal';
-import ProjectForm from '../../components/ProjectForm';
+import AdminTable from '../../components/common/AdminTable';
+import AdminModal from '../../components/common/AdminModal';
+import ProjectForm from '../../components/forms/ProjectForm';
 
 export default function GestionProyectos() {
   const [proyectos, setProyectos] = useState([]);

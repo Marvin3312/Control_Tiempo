@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../AuthContext';
 
 export default function RutaProtegida({ children }) {
   const { session, perfilEmpleado, loadingProfile } = useAuth();

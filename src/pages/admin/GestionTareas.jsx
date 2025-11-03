@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import AdminTable from '../../components/AdminTable';
-import AdminModal from '../../components/AdminModal';
-import TaskForm from '../../components/TaskForm';
+import AdminTable from '../../components/common/AdminTable';
+import AdminModal from '../../components/common/AdminModal';
+import TaskForm from '../../components/forms/TaskForm';
 
 export default function GestionTareas() {
   const [tareas, setTareas] = useState([]);
