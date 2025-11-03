@@ -1,0 +1,13 @@
+
+.admin-table {
+  margin-top: 20px;
+}
+
+.admin-table th {
+  font-weight: 600;
+}
+
+.admin-table .btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
