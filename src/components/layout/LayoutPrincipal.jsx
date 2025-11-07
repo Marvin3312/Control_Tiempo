@@ -35,7 +35,7 @@ function LayoutPrincipal() {
               )}
             </ul>
             <span className="navbar-text me-3" style={{ color: 'var(--color-white)' }}>
-              ¡Hola, {perfilEmpleado?.nombrecompleto}!
+              {perfilEmpleado?.nombrecompleto}!
             </span>
             <button className="btn btn-secondary" onClick={handleLogout}>Cerrar sesión</button>
           </div>
