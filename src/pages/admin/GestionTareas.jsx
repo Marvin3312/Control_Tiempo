@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import AdminTable from '../../components/common/AdminTable';
 import AdminModal from '../../components/common/AdminModal';
 import TaskForm from '../../components/forms/TaskForm';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 export default function GestionTareas() {
   const [tareas, setTareas] = useState([]);
@@ -11,6 +11,8 @@ export default function GestionTareas() {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeKey, setActiveKey] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -18,18 +20,26 @@ export default function GestionTareas() {
         setLoading(true);
         const { data: tareasData, error: tareasError } = await supabase
           .from('tareas')
-          .select('*, proyecto:proyectos(nombre)');
+          .select('*');
 
         if (tareasError) throw tareasError;
 
         const { data: proyectosData, error: proyectosError } = await supabase
           .from('proyectos')
-          .select('*');
+          .select('*')
+          .eq('activo', true);
 
         if (proyectosError) throw proyectosError;
 
-        setTareas(tareasData.map(t => ({...t, nombre_proyecto: t.proyecto.nombre})));
-        setProyectos(proyectosData);
+        const proyectosMap = new Map(proyectosData.map(p => [p.proyectoid, p.nombreproyecto]));
+
+        setTareas(tareasData.map(t => ({
+          ...t,
+          id: t.tareaid,
+          nombre_proyecto: proyectosMap.get(t.proyectoid) || 'N/A'
+        })));
+
+        setProyectos(proyectosData.map(p => ({...p, id: p.proyectoid})));
       } catch (error) {
         setError(error.message);
       } finally {
@@ -43,24 +53,6 @@ export default function GestionTareas() {
   const handleEdit = (task) => {
     setEditingTask(task);
     setIsModalOpen(true);
-  };
-
-  const handleDelete = async (task) => {
-    if (window.confirm(`¿Está seguro de que desea eliminar la tarea ${task.descripcion}?`)) {
-      try {
-        const { error } = await supabase
-          .from('tareas')
-          .delete()
-          .eq('id', task.id);
-
-        if (error) throw error;
-
-        setTareas(tareas.filter((t) => t.id !== task.id));
-      } catch (error) {
-        console.error('Error deleting task:', error);
-        // TODO: Show notification
-      }
-    }
   };
 
   const handleAdd = () => {
@@ -82,19 +74,25 @@ export default function GestionTareas() {
           .from('tareas')
           .update(taskData)
           .eq('id', editingTask.id)
-          .select('*, proyecto:proyectos(nombre)');
+          .select('*');
       } else {
         result = await supabase
           .from('tareas')
           .insert(taskData)
-          .select('*, proyecto:proyectos(nombre)');
+          .select('*');
       }
 
       const { data, error } = result;
 
       if (error) throw error;
-      
-      const newTask = {...data[0], nombre_proyecto: data[0].proyecto.nombre};
+
+      const newTaskData = data[0];
+      const proyecto = proyectos.find(p => p.id === newTaskData.proyectoid);
+      const newTask = {
+        ...newTaskData,
+        id: newTaskData.tareaid,
+        nombre_proyecto: proyecto ? proyecto.nombreproyecto : 'N/A'
+      };
 
       if (editingTask) {
         setTareas(tareas.map(t => t.id === editingTask.id ? newTask : t));
@@ -109,14 +107,20 @@ export default function GestionTareas() {
     }
   };
 
-  const columns = [
-    { key: 'id', header: 'ID' },
-    { key: 'descripcion', header: 'Descripción' },
-    { key: 'nombre_proyecto', header: 'Proyecto' },
-    { key: 'escargable', header: 'Cargable' },
-  ];
+  const filteredTareas = tareas.filter(tarea =>
+    tarea.descripciontarea.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  if (loading) return <p>Cargando...</p>;
+  const groupedTareas = filteredTareas.reduce((acc, tarea) => {
+    const projectName = tarea.nombre_proyecto || 'Sin Proyecto';
+    if (!acc[projectName]) {
+      acc[projectName] = [];
+    }
+    acc[projectName].push(tarea);
+    return acc;
+  }, {});
+
+  if (loading) return <LoadingSpinner />;
   if (error) return <p>Error: {error}</p>;
 
   return (
@@ -125,14 +129,66 @@ export default function GestionTareas() {
         <h2>Gestión de Tareas</h2>
         <button className="btn btn-primary" onClick={handleAdd}>Añadir Tarea</button>
       </div>
-      <AdminTable 
-        columns={columns} 
-        data={tareas.map(t => ({...t, escargable: t.escargable ? 'Sí' : 'No'}))} 
-        onEdit={handleEdit} 
-        onDelete={handleDelete} 
-      />
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Buscar tarea..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      <div className="accordion" id="accordion-tareas">
+        {Object.entries(groupedTareas).map(([projectName, tasks], index) => (
+          <div className="accordion-item" key={projectName}>
+            <h2 className="accordion-header" id={`heading-${index}`}>
+              <button 
+                className={`accordion-button ${activeKey !== index ? 'collapsed' : ''}`} 
+                type="button" 
+                onClick={() => setActiveKey(activeKey === index ? null : index)}
+                aria-expanded={activeKey === index}
+                aria-controls={`collapse-${index}`}
+              >
+                {projectName} ({tasks.length} tareas)
+              </button>
+            </h2>
+            <div 
+              id={`collapse-${index}`} 
+              className={`accordion-collapse collapse ${activeKey === index ? 'show' : ''}`}
+              aria-labelledby={`heading-${index}`}
+            >
+              <div className="accordion-body">
+                <table className="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Descripción</th>
+                      <th>Cargable</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tasks.map(task => (
+                      <tr key={task.id}>
+                        <td>{task.id}</td>
+                        <td>{task.descripciontarea}</td>
+                        <td>{task.escargable ? 'Sí' : 'No'}</td>
+                        <td>
+                          <button className="btn btn-sm btn-primary" onClick={() => handleEdit(task)}>Editar</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <AdminModal 
-        isOpen={isModalOpen} 
+        isOpen={isModalOpen}
         onClose={handleModalClose} 
         title={editingTask ? 'Editar Tarea' : 'Añadir Tarea'}
       >

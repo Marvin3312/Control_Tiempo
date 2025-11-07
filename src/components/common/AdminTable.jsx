@@ -2,7 +2,7 @@
 import React from 'react';
 import './AdminTable.css';
 
-export default function AdminTable({ columns, data, onEdit, onDelete }) {
+export default function AdminTable({ columns, data, onEdit, onToggleActive }) {
   return (
     <div className="table-responsive">
       <table className="table table-striped admin-table">
@@ -12,6 +12,7 @@ export default function AdminTable({ columns, data, onEdit, onDelete }) {
               <th key={col.key}>{col.header}</th>
             ))}
             <th>Acciones</th>
+            {onToggleActive && <th>Activo</th>}
           </tr>
         </thead>
         <tbody>
@@ -24,10 +25,19 @@ export default function AdminTable({ columns, data, onEdit, onDelete }) {
                 <button className="btn btn-sm btn-primary me-2" onClick={() => onEdit(row)}>
                   Editar
                 </button>
-                <button className="btn btn-sm btn-danger" onClick={() => onDelete(row)}>
-                  Eliminar
-                </button>
               </td>
+              {onToggleActive && (
+                <td>
+                  <label className="switch">
+                    <input 
+                      type="checkbox" 
+                      checked={row.activo}
+                      onChange={() => onToggleActive(row)}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

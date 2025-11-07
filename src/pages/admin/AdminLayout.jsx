@@ -1,8 +1,9 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import './AdminLayout.css';
 
 export default function AdminLayout() {
+  const location = useLocation();
   return (
     <div className="d-flex admin-layout">
       <nav className="admin-sidebar">
@@ -17,6 +18,9 @@ export default function AdminLayout() {
           <li className="nav-item">
             <NavLink to="/admin/tareas" className="nav-link">Tareas</NavLink>
           </li>
+          <li className="nav-item">
+            <NavLink to="/admin/unified-form-test" className="nav-link">Formulario</NavLink>
+          </li>
         </ul>
         <hr />
         <h4 className="px-3 py-2">Sistema de repote</h4>
@@ -30,7 +34,7 @@ export default function AdminLayout() {
         </ul>
       </nav>
       <main className="admin-content">
-        <Outlet />
+        <Outlet key={location.pathname} />
       </main>
     </div>
   );

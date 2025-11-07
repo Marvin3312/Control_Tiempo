@@ -21,6 +21,7 @@ import RutaProtegidaAdmin from './components/auth/RutaProtegidaAdmin';
 import GestionClientes from './pages/admin/GestionClientes';
 import GestionProyectos from './pages/admin/GestionProyectos';
 import GestionTareas from './pages/admin/GestionTareas';
+import UnifiedFormTest from './pages/admin/UnifiedFormTest';
 
 export default function App() {
   return (
@@ -59,6 +60,7 @@ export default function App() {
             <Route path="clientes" element={<GestionClientes />} />
             <Route path="proyectos" element={<GestionProyectos />} />
             <Route path="tareas" element={<GestionTareas />} />
+            <Route path="unified-form-test" element={<UnifiedFormTest />} />
           </Route>
 
           {/* Not Found Route */}

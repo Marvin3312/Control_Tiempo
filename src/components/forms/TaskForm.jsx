@@ -24,31 +24,31 @@ export default function TaskForm({ onSubmit, initialData = {}, proyectos }) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-3">
-        <label htmlFor="descripcion" className="form-label">Descripción de la Tarea</label>
+        <label htmlFor="descripciontarea" className="form-label">Descripción de la Tarea</label>
         <input
           type="text"
           className="form-control"
-          id="descripcion"
-          name="descripcion"
-          value={formData.descripcion || ''}
+          id="descripciontarea"
+          name="descripciontarea"
+          value={formData.descripciontarea || ''}
           onChange={handleChange}
           required
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="proyecto_id" className="form-label">Proyecto</label>
+        <label htmlFor="proyectoid" className="form-label">Proyecto</label>
         <select
           className="form-control"
-          id="proyecto_id"
-          name="proyecto_id"
-          value={formData.proyecto_id || ''}
+          id="proyectoid"
+          name="proyectoid"
+          value={formData.proyectoid || ''}
           onChange={handleChange}
           required
         >
           <option value="" disabled>Seleccione un proyecto</option>
           {proyectos.map(proyecto => (
             <option key={proyecto.id} value={proyecto.id}>
-              {proyecto.nombre}
+              {proyecto.nombreproyecto}
             </option>
           ))}
         </select>
