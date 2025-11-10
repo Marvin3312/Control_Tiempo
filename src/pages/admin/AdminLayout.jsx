@@ -19,6 +19,9 @@ export default function AdminLayout() {
             <NavLink to="/admin/tareas" className="nav-link">Tareas</NavLink>
           </li>
           <li className="nav-item">
+            <NavLink to="/admin/empleados" className="nav-link">Empleados</NavLink>
+          </li>
+          <li className="nav-item">
             <NavLink to="/admin/unified-form-test" className="nav-link">Formulario</NavLink>
           </li>
         </ul>
