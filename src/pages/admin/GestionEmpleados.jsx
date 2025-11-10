@@ -13,22 +13,26 @@ export default function GestionEmpleados() {
   const [editingEmpleado, setEditingEmpleado] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // TODO: Implementar fetchEmpleados
   useEffect(() => {
     async function fetchEmpleados() {
       try {
         setLoading(true);
-        // Placeholder: Remplazar con la llamada a Supabase para obtener empleados
-        const { data, error } = await supabase.from('empleados').select('*, departamento_id(*)');
-        if (error) throw error;
+        const { data, error } = await supabase
+          .from('empleados')
+          .select('empleadoid, nombrecompleto, activo, departamentoid, puestoid, departamentos(nombredepto), puestos(nombrepuesto)');
+        
+        if (error) {
+          throw error;
+        }
 
-        const empleadosConDepartamento = data.map(e => ({
+        const empleadosConRelaciones = data.map(e => ({
             ...e,
-            id: e.id,
-            nombre_departamento: e.departamento_id ? e.departamento_id.nombre : 'N/A'
+            id: e.empleadoid, // Usar empleadoid como id para la tabla
+            nombre_departamento: e.departamentos ? e.departamentos.nombredepto : 'N/A',
+            nombre_puesto: e.puestos ? e.puestos.nombrepuesto : 'N/A'
         }));
 
-        setEmpleados(empleadosConDepartamento);
+        setEmpleados(empleadosConRelaciones);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -44,10 +48,36 @@ export default function GestionEmpleados() {
     setIsModalOpen(true);
   };
 
-  // TODO: Implementar handleToggleActive si es necesario para empleados
   const handleToggleActive = async (empleado) => {
-    console.log('Toggle active para:', empleado);
-    // Implementar la lógica de activación/desactivación si se añade el campo 'activo' a la tabla empleados
+    try {
+      const { data, error } = await supabase
+        .from('empleados')
+        .update({ activo: !empleado.activo })
+        .eq('empleadoid', empleado.empleadoid)
+        .select('empleadoid, nombrecompleto, activo, departamentoid, puestoid, departamentos(nombredepto), puestos(nombrepuesto)')
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const updatedEmpleadoConRelaciones = {
+        ...data,
+        id: data.empleadoid,
+        nombre_departamento: data.departamentos ? data.departamentos.nombredepto : 'N/A',
+        nombre_puesto: data.puestos ? data.puestos.nombrepuesto : 'N/A'
+      };
+
+      setEmpleados(
+        empleados.map((e) =>
+          e.empleadoid === empleado.empleadoid ? updatedEmpleadoConRelaciones : e
+        )
+      );
+    } catch (error) {
+      console.error('Error toggling employee active state:', error);
+      setError(error.message);
+      // TODO: Show notification to user
+    }
   };
   
   const handleAdd = () => {
@@ -62,14 +92,13 @@ export default function GestionEmpleados() {
 
   const handleFormSubmit = async (formData) => {
     try {
-      const { nombre, apellido, email, puesto, departamento_id } = formData;
+      const { nombrecompleto, puestoid, departamentoid, activo } = formData;
 
       const empleadoData = {
-        nombre,
-        apellido,
-        email,
-        puesto,
-        departamento_id,
+        nombrecompleto,
+        puestoid: parseInt(puestoid), // Asegurarse de que sea un entero
+        departamentoid: parseInt(departamentoid), // Asegurarse de que sea un entero
+        activo: activo || false, // Default a false si no está definido
       };
 
       let result;
@@ -78,15 +107,15 @@ export default function GestionEmpleados() {
         result = await supabase
           .from('empleados')
           .update(empleadoData)
-          .eq('id', editingEmpleado.id)
-          .select('*, departamento_id(*)')
+          .eq('empleadoid', editingEmpleado.empleadoid)
+          .select('empleadoid, nombrecompleto, activo, departamentoid, puestoid, departamentos(nombredepto), puestos(nombrepuesto)')
           .single();
       } else {
         // Insert
         result = await supabase
           .from('empleados')
           .insert(empleadoData)
-          .select('*, departamento_id(*)')
+          .select('empleadoid, nombrecompleto, activo, departamentoid, puestoid, departamentos(nombredepto), puestos(nombrepuesto)')
           .single();
       }
 
@@ -96,16 +125,17 @@ export default function GestionEmpleados() {
         throw error;
       }
       
-      const empleadoConDepartamento = {
+      const empleadoConRelaciones = {
         ...updatedEmpleado,
-        id: updatedEmpleado.id,
-        nombre_departamento: updatedEmpleado.departamento_id ? updatedEmpleado.departamento_id.nombre : 'N/A'
+        id: updatedEmpleado.empleadoid,
+        nombre_departamento: updatedEmpleado.departamentos ? updatedEmpleado.departamentos.nombredepto : 'N/A',
+        nombre_puesto: updatedEmpleado.puestos ? updatedEmpleado.puestos.nombrepuesto : 'N/A'
       };
 
       if (editingEmpleado) {
-        setEmpleados(empleados.map(e => e.id === editingEmpleado.id ? empleadoConDepartamento : e));
+        setEmpleados(empleados.map(e => e.empleadoid === editingEmpleado.empleadoid ? empleadoConRelaciones : e));
       } else {
-        setEmpleados([...empleados, empleadoConDepartamento]);
+        setEmpleados([...empleados, empleadoConRelaciones]);
       }
 
       handleModalClose();
@@ -117,17 +147,15 @@ export default function GestionEmpleados() {
   };
 
   const columns = [
-    { key: 'id', header: 'ID' },
-    { key: 'nombre', header: 'Nombre' },
-    { key: 'apellido', header: 'Apellido' },
-    { key: 'email', header: 'Email' },
-    { key: 'puesto', header: 'Puesto' },
+    { key: 'empleadoid', header: 'ID' },
+    { key: 'nombrecompleto', header: 'Nombre Completo' },
+    { key: 'nombre_puesto', header: 'Puesto' },
     { key: 'nombre_departamento', header: 'Departamento' },
+    { key: 'activo', header: 'Activo', type: 'boolean' },
   ];
 
   const filteredEmpleados = empleados.filter(empleado =>
-    empleado.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    empleado.apellido.toLowerCase().includes(searchTerm.toLowerCase())
+    empleado.nombrecompleto.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) return <LoadingSpinner />;
@@ -145,7 +173,7 @@ export default function GestionEmpleados() {
         <input
           type="text"
           className="form-control"
-          placeholder="Buscar empleado por nombre o apellido..."
+          placeholder="Buscar empleado por nombre completo..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -154,7 +182,7 @@ export default function GestionEmpleados() {
         columns={columns} 
         data={filteredEmpleados} 
         onEdit={handleEdit} 
-        onToggleActive={handleToggleActive} // Asegurarse que la tabla pueda manejar esto
+        onToggleActive={handleToggleActive} 
       />
       <AdminModal 
         isOpen={isModalOpen} 
@@ -162,7 +190,7 @@ export default function GestionEmpleados() {
         title={editingEmpleado ? 'Editar Empleado' : 'Añadir Empleado'}
       >
         <UnifiedForm 
-          formType="employee" // Este tipo se usará para cargar la config del formulario
+          formType="employee" 
           onSubmit={handleFormSubmit} 
           initialData={editingEmpleado || {}}
         />

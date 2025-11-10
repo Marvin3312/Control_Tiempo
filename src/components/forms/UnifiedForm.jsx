@@ -25,6 +25,7 @@ export default function UnifiedForm({ formType, onSubmit, initialData = {} }) {
 
     const departamentos = useSelectData('departamentos');
     const clientes = useSelectData('clientes');
+    const puestos = useSelectData('puestos'); // Añadido para obtener datos de puestos
 
     useEffect(() => {
         setFormData(initialData);
@@ -61,11 +62,10 @@ export default function UnifiedForm({ formType, onSubmit, initialData = {} }) {
         employee: {
             title: 'Datos del Empleado',
             fields: [
-                { name: 'nombre', label: 'Nombre', type: 'text', required: true },
-                { name: 'apellido', label: 'Apellido', type: 'text', required: true },
-                { name: 'email', label: 'Email', type: 'email', required: true },
-                { name: 'puesto', label: 'Puesto', type: 'text' },
-                { name: 'departamento_id', label: 'Departamento', type: 'select', options: departamentos, optionValue: 'id', optionLabel: 'nombre', required: true },
+                { name: 'nombrecompleto', label: 'Nombre Completo', type: 'text', required: true },
+                { name: 'puestoid', label: 'Puesto', type: 'select', options: puestos, optionValue: 'puestoid', optionLabel: 'nombrepuesto', required: true },
+                { name: 'departamentoid', label: 'Departamento', type: 'select', options: departamentos, optionValue: 'departamentoid', optionLabel: 'nombredepto', required: true },
+                { name: 'activo', label: 'Activo', type: 'checkbox' },
             ]
         }
     };
