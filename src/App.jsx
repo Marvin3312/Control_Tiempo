@@ -15,7 +15,7 @@ import PanelDeControl from './pages/PanelDeControl';
 import LayoutPrincipal from './components/layout/LayoutPrincipal';
 import AdminLayout from './pages/admin/AdminLayout';
 import RutaProtegida from './components/auth/RutaProtegida';
-import RutaProtegidaAdmin from './components/auth/RutaProtegidaAdmin';
+import RutaProtegidaManager from './components/auth/RutaProtegidaManager';
 
 // Admin Page Imports
 import GestionClientes from './pages/admin/GestionClientes';
@@ -45,6 +45,14 @@ export default function App() {
             <Route index element={<HojaDeTiempo />} />
             <Route path="dashboard" element={<DashboardKPIs />} />
             <Route path="reportes" element={<Reportes />} />
+          </Route>
+
+          {/* Manager Routes */}
+          <Route element={
+            <RutaProtegidaManager>
+              <LayoutPrincipal />
+            </RutaProtegidaManager>
+          }>
             <Route path="panel-de-control" element={<PanelDeControl />} />
           </Route>
 
