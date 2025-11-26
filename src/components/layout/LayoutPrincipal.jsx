@@ -22,7 +22,7 @@ function LayoutPrincipal() {
                 <NavLink className="nav-link" to="/" style={{ color: 'var(--color-white)' }}>Hoja de Tiempo</NavLink>
               </li>
               
-              {(role === 'admin' || role === 'tecnico') && (
+              {(role === 'admin' || role === 'RRHH') && (
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/panel-de-control" style={{ color: 'var(--color-white)' }}>Panel de control</NavLink>
                 </li>
