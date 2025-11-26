@@ -15,6 +15,7 @@ import PanelDeControl from './pages/PanelDeControl';
 import LayoutPrincipal from './components/layout/LayoutPrincipal';
 import AdminLayout from './pages/admin/AdminLayout';
 import RutaProtegida from './components/auth/RutaProtegida';
+import RutaProtegidaAdmin from './components/auth/RutaProtegidaAdmin';
 import RutaProtegidaManager from './components/auth/RutaProtegidaManager';
 
 // Admin Page Imports
