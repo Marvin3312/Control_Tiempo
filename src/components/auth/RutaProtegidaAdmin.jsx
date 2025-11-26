@@ -2,11 +2,6 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 
-
-import RutaProtegidaAdmin from './ruta/al/RutaProtegidaAdmin';
-   // O si es una exportación nombrada:
-   import { RutaProtegidaAdmin } from './ruta/al/RutaProtegidaAdmin';
-
 export default function RutaProtegidaAdmin({ children }) {
   const { session, perfilEmpleado, loadingProfile, role } = useAuth();
 
