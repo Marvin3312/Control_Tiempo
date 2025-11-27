@@ -46,7 +46,7 @@ export default function UnifiedForm({ formType, onSubmit, initialData = {} }) {
             title: 'Datos del Cliente',
             fields: [
                 { name: 'nombrecliente', label: 'Nombre del Cliente', type: 'text', required: true },
-                { name: 'parentclienteid', label: 'ID Cliente Padre (Opcional)', type: 'number' },
+                { name: 'parentclienteid', label: 'Cliente Padre (Opcional)', type: 'select', options: clientes, optionValue: 'clienteid', optionLabel: 'nombrecliente' },
                 { name: 'activo', label: 'Activo', type: 'checkbox' },
             ]
         },
@@ -95,7 +95,9 @@ export default function UnifiedForm({ formType, onSubmit, initialData = {} }) {
                                 onChange={handleChange}
                                 required={required}
                             >
-                                <option value="" disabled>Seleccione una opción</option>
+                                <option value="" disabled={required}>
+                                {required ? 'Seleccione una opción' : 'Ninguno'}
+                            </option>
                                 {options?.map(option => (
                                     <option key={option[optionValue]} value={option[optionValue]}>
                                         {option[optionLabel]}
