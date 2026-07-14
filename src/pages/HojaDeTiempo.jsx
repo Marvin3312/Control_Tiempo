@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { api } from '../api';
+import api from '../api';
 import { useAuth } from '../AuthContext';
 import { TimeTable } from '../components/timetable/TimeTable';
 import { Notification } from '../components/common/Notification';

@@ -20,6 +20,8 @@ model clientes {
   nombrecliente   String   @unique @db.VarChar(255)
   parentclienteid Int?
   activo          Boolean? @default(true)
+  
+  proyectos       proyectos[]
 
   @@index([parentclienteid], map: "idx_cliente_parent")
 }
@@ -40,6 +42,7 @@ model empleados {
   email          String?  @unique @db.VarChar(255)
   password_hash  String?  @db.VarChar(255)
   auditoria      auditoria[]
+  registrosdetiempo registrosdetiempo[]
 
   @@index([departamentoid], map: "idx_empleado_depto")
   @@index([puestoid], map: "idx_empleado_puesto")
@@ -53,6 +56,9 @@ model proyectos {
   referenciacaseware String?  @unique @db.VarChar(100)
   tipotrabajoid      Int?
   activo             Boolean? @default(true)
+  
+  tareas             tareas[]
+  clientes           clientes @relation(fields: [clienteid], references: [clienteid], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([clienteid], map: "idx_proyecto_cliente")
 }
@@ -73,6 +79,9 @@ model registrosdetiempo {
   proyectoid         Int?
   referenciacaseware String?  @db.VarChar(100)
 
+  empleados          empleados @relation(fields: [empleadoid], references: [empleadoid], onDelete: NoAction, onUpdate: NoAction)
+  tareas             tareas    @relation(fields: [tareaid], references: [tareaid], onDelete: NoAction, onUpdate: NoAction)
+
   @@index([empleadoid], map: "idx_registro_empleado")
   @@index([fecha], map: "idx_registro_fecha")
   @@index([tareaid], map: "idx_registro_tarea")
@@ -85,6 +94,9 @@ model tareas {
   escargable        Boolean @default(true)
   categoria_trabajo String? @db.VarChar(100)
   codigo_tarea      String? @db.VarChar(50)
+  
+  registrosdetiempo registrosdetiempo[]
+  proyectos         proyectos @relation(fields: [proyectoid], references: [proyectoid], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([proyectoid, codigo_tarea], map: "unique_tarea_codigo_proyecto")
   @@index([proyectoid], map: "idx_tarea_proyecto")

@@ -225,10 +225,13 @@ app.get('/api/tareas', authMiddleware, async (req, res) => {
 
 app.post('/api/tareas', authMiddleware, async (req, res) => {
   try {
-    const tarea = await prisma.tareas.create({ data: req.body });
-    await registrarAuditoria(req, 'CREATE', 'tareas', tarea.tareaid, req.body);
+    const { proyectoid, ...rest } = req.body;
+    const data = { ...rest, proyectoid: Number(proyectoid) };
+    const tarea = await prisma.tareas.create({ data });
+    await registrarAuditoria(req, 'CREATE', 'tareas', tarea.tareaid, data);
     res.json(tarea);
   } catch (error) {
+    console.error('Error POST /api/tareas:', error);
     res.status(500).json({ error: 'Error al crear tarea' });
   }
 });
@@ -282,6 +285,7 @@ app.post('/api/empleados', authMiddleware, async (req, res) => {
     await registrarAuditoria(req, 'CREATE', 'empleados', emp.empleadoid, req.body);
     res.json(emp);
   } catch (error) {
+    console.error('Error POST /api/empleados:', error);
     res.status(500).json({ error: 'Error al crear empleado' });
   }
 });
@@ -341,7 +345,7 @@ app.post('/api/reporte-filtrado', authMiddleware, async (req, res) => {
       where.tarea = { proyectos: { clienteid: cliente_id_filtro } };
     }
 
-    const registros = await prisma.registros_tiempo.findMany({
+    const registros = await prisma.registrosdetiempo.findMany({
       where,
       include: {
         empleados: true,

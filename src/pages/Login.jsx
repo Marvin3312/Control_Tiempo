@@ -76,7 +76,14 @@ export default function Login() {
             />
           </div>
           <button type="submit" className="btn btn-primary w-100 d-inline-flex justify-content-center align-items-center gap-2" disabled={loading}>
-            {loading ? 'Cargando...' : <><LogIn size={18} /> Entrar</>}
+            {loading ? (
+              <span>Cargando...</span>
+            ) : (
+              <>
+                <LogIn size={18} /> 
+                <span>Entrar</span>
+              </>
+            )}
           </button>
         </form>
       </div>
