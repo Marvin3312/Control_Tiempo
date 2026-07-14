@@ -39,6 +39,7 @@ model empleados {
   role           String?  @default("usuario")
   email          String?  @unique @db.VarChar(255)
   password_hash  String?  @db.VarChar(255)
+  auditoria      auditoria[]
 
   @@index([departamentoid], map: "idx_empleado_depto")
   @@index([puestoid], map: "idx_empleado_puesto")
@@ -93,4 +94,16 @@ model tipo_de_trabajo {
   tipotrabajoid  Int    @id @default(autoincrement())
   departamento   String @db.VarChar(100)
   nombre_trabajo String @unique @db.VarChar(100)
+}
+
+model auditoria {
+  id              Int       @id @default(autoincrement())
+  usuarioid       Int?      // ID del usuario que realizó la acción
+  accion          String    @db.VarChar(50) // CREATE, UPDATE, DELETE
+  tabla_afectada  String    @db.VarChar(100)
+  registro_id     Int?      // ID del registro afectado
+  detalles        Json?     // Detalles de los cambios en JSON
+  fecha           DateTime  @default(now()) @db.Timestamp(6)
+  
+  empleados       empleados? @relation(fields: [usuarioid], references: [empleadoid], onDelete: SetNull, onUpdate: NoAction)
 }

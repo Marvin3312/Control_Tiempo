@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient';
+import api from '../../api';
 import AdminTable from '../../components/common/AdminTable';
 import AdminModal from '../../components/common/AdminModal';
 import UnifiedForm from '../../components/forms/UnifiedForm';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { PlusCircle } from 'lucide-react';
 
 export default function GestionClientes() {
   const [clientes, setClientes] = useState([]);
@@ -17,13 +18,7 @@ export default function GestionClientes() {
     async function fetchClientes() {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('clientes')
-          .select('clienteid, nombrecliente, parentclienteid, activo');
-
-        if (error) {
-          throw error;
-        }
+        const data = await api.get('/clientes');
 
         const clientesMap = new Map(data.map(c => [c.clienteid, c.nombrecliente]));
 
@@ -51,16 +46,7 @@ export default function GestionClientes() {
 
   const handleToggleActive = async (cliente) => {
     try {
-      const { data, error } = await supabase
-        .from('clientes')
-        .update({ activo: !cliente.activo })
-        .eq('clienteid', cliente.clienteid)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
+      const data = await api.put(`/clientes/${cliente.clienteid}`, { activo: !cliente.activo });
 
       setClientes(
         clientes.map((c) =>
@@ -93,29 +79,12 @@ export default function GestionClientes() {
         activo,
       };
 
-      let result;
+      let newClientData;
       if (editingClient) {
-        // Update
-        result = await supabase
-          .from('clientes')
-          .update(clientDataToSubmit)
-          .eq('clienteid', editingClient.clienteid)
-          .select();
+        newClientData = await api.put(`/clientes/${editingClient.clienteid}`, clientDataToSubmit);
       } else {
-        // Insert
-        result = await supabase
-          .from('clientes')
-          .insert(clientDataToSubmit)
-          .select();
+        newClientData = await api.post('/clientes', clientDataToSubmit);
       }
-
-      const { data, error } = result;
-
-      if (error) {
-        throw error;
-      }
-
-      const newClientData = data[0];
 
       // Create a map of clients to find the parent client name
       const clientesMap = new Map(clientes.map(c => [c.clienteid, c.nombrecliente]));
@@ -160,8 +129,8 @@ export default function GestionClientes() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Gestión de Clientes</h2>
-        <button className="btn btn-primary" onClick={handleAdd}>
-          Añadir Cliente
+        <button className="btn btn-primary d-inline-flex align-items-center gap-2" onClick={handleAdd}>
+          <PlusCircle size={18} /> Añadir Cliente
         </button>
       </div>
       <div className="mb-3">

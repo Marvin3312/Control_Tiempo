@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient';
+import api from '../../api';
 import './UnifiedForm.css';
 
 // Hook para obtener datos para los selects
@@ -8,11 +8,12 @@ const useSelectData = (dataType) => {
     useEffect(() => {
         const fetchData = async () => {
             if (!dataType) return;
-            const { data: result, error } = await supabase.from(dataType).select('*');
-            if (error) {
-                console.error(`Error fetching ${dataType}:`, error);
-            } else {
+            try {
+                // dataType is typically 'departamentos', 'clientes', 'puestos'
+                const result = await api.get(`/${dataType}`);
                 setData(result);
+            } catch (error) {
+                console.error(`Error fetching ${dataType}:`, error);
             }
         };
         fetchData();

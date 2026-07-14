@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient';
+import api from '../../api';
 import AdminTable from '../../components/common/AdminTable';
 import AdminModal from '../../components/common/AdminModal';
 import UnifiedForm from '../../components/forms/UnifiedForm';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { PlusCircle } from 'lucide-react';
 
 export default function GestionProyectos() {
   const [proyectos, setProyectos] = useState([]);
@@ -18,17 +19,8 @@ export default function GestionProyectos() {
     async function fetchData() {
       try {
         setLoading(true);
-        const { data: proyectosData, error: proyectosError } = await supabase
-          .from('proyectos')
-          .select('*');
-
-        if (proyectosError) throw proyectosError;
-
-        const { data: clientesData, error: clientesError } = await supabase
-          .from('clientes')
-          .select('*');
-
-        if (clientesError) throw clientesError;
+        const proyectosData = await api.get('/proyectos');
+        const clientesData = await api.get('/clientes');
 
         const clientesMap = new Map(clientesData.map(c => [c.clienteid, c.nombrecliente]));
 
@@ -56,20 +48,11 @@ export default function GestionProyectos() {
 
   const handleToggleActive = async (project) => {
     try {
-      const { data, error } = await supabase
-        .from('proyectos')
-        .update({ activo: !project.activo })
-        .eq('proyectoid', project.proyectoid)
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
+      await api.put(`/proyectos/${project.proyectoid}`, { activo: !project.activo });
 
       setProyectos(
         proyectos.map((p) =>
-          p.proyectoid === project.proyectoid ? { ...p, activo: data.activo } : p
+          p.proyectoid === project.proyectoid ? { ...p, activo: !project.activo } : p
         )
       );
     } catch (error) {
@@ -96,14 +79,7 @@ export default function GestionProyectos() {
 
       // If creating a new client, insert it first
       if (clientSelection === 'new') {
-        const { data: newClientData, error: newClientError } = await supabase
-          .from('clientes')
-          .insert({ nombrecliente: newClientName })
-          .select('clienteid')
-          .single();
-
-        if (newClientError) throw newClientError;
-
+        const newClientData = await api.post('/clientes', { nombrecliente: newClientName });
         clienteid = newClientData.clienteid;
         
         // Add the new client to the local state
@@ -117,25 +93,12 @@ export default function GestionProyectos() {
         activo: projectDataFromForm.activo,
       };
 
-      let result;
+      let newProjectData;
       if (editingProject) {
-        result = await supabase
-          .from('proyectos')
-          .update(projectDataToSubmit)
-          .eq('proyectoid', editingProject.proyectoid)
-          .select('*')
-          .single();
+        newProjectData = await api.put(`/proyectos/${editingProject.proyectoid}`, projectDataToSubmit);
       } else {
-        result = await supabase
-          .from('proyectos')
-          .insert(projectDataToSubmit)
-          .select('*')
-          .single();
+        newProjectData = await api.post('/proyectos', projectDataToSubmit);
       }
-
-      const { data: newProjectData, error: projectError } = result;
-
-      if (projectError) throw projectError;
 
       const cliente = clientes.find(c => c.id === newProjectData.clienteid);
       const newProject = {
@@ -175,7 +138,9 @@ export default function GestionProyectos() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Gestión de Proyectos</h2>
-        <button className="btn btn-primary" onClick={handleAdd}>Añadir Proyecto</button>
+        <button className="btn btn-primary d-inline-flex align-items-center gap-2" onClick={handleAdd}>
+          <PlusCircle size={18} /> Añadir Proyecto
+        </button>
       </div>
       <div className="mb-3">
         <input

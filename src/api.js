@@ -8,7 +8,7 @@ const getHeaders = () => {
   };
 };
 
-export const api = {
+const api = {
   async get(endpoint) {
     const res = await fetch(`${API_URL}${endpoint}`, { headers: getHeaders() });
     if (!res.ok) throw new Error(`Error: ${res.statusText}`);
@@ -35,3 +35,5 @@ export const api = {
     return res.json();
   }
 };
+
+export default api;

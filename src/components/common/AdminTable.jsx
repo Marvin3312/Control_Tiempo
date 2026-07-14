@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Edit2 } from 'lucide-react';
 import './AdminTable.css';
 
 export default function AdminTable({ columns, data, onEdit, onToggleActive }) {
@@ -22,8 +23,8 @@ export default function AdminTable({ columns, data, onEdit, onToggleActive }) {
                 <td key={col.key}>{row[col.key]}</td>
               ))}
               <td>
-                <button className="btn btn-sm btn-primary me-2" onClick={() => onEdit(row)}>
-                  Editar
+                <button className="btn btn-sm btn-primary me-2 d-inline-flex align-items-center gap-1" onClick={() => onEdit(row)}>
+                  <Edit2 size={14} /> Editar
                 </button>
               </td>
               {onToggleActive && (

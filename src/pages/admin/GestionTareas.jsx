@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient';
+import api from '../../api';
 import AdminModal from '../../components/common/AdminModal';
 import TaskForm from '../../components/forms/TaskForm';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { PlusCircle } from 'lucide-react';
 
 export default function GestionTareas() {
   const [tareas, setTareas] = useState([]);
@@ -18,25 +19,13 @@ export default function GestionTareas() {
     async function fetchData() {
       try {
         setLoading(true);
-        const { data: tareasData, error: tareasError } = await supabase
-          .from('tareas')
-          .select('*');
-
-        if (tareasError) throw tareasError;
-
-        const { data: proyectosData, error: proyectosError } = await supabase
-          .from('proyectos')
-          .select('*')
-          .eq('activo', true);
-
-        if (proyectosError) throw proyectosError;
-
-        const proyectosMap = new Map(proyectosData.map(p => [p.proyectoid, p.nombreproyecto]));
+        const tareasData = await api.get('/tareas');
+        const proyectosData = await api.get('/proyectos');
 
         setTareas(tareasData.map(t => ({
           ...t,
           id: t.tareaid,
-          nombre_proyecto: proyectosMap.get(t.proyectoid) || 'N/A'
+          nombre_proyecto: t.proyectos ? t.proyectos.nombreproyecto : 'N/A'
         })));
 
         setProyectos(proyectosData.map(p => ({...p, id: p.proyectoid})));
@@ -68,37 +57,18 @@ export default function GestionTareas() {
   const handleFormSubmit = async (formData) => {
     try {
       const { nombre_proyecto, ...taskData } = formData;
-      let result;
       if (editingTask) {
-        result = await supabase
-          .from('tareas')
-          .update(taskData)
-          .eq('id', editingTask.id)
-          .select('*');
+        await api.put(`/tareas/${editingTask.id}`, taskData);
       } else {
-        result = await supabase
-          .from('tareas')
-          .insert(taskData)
-          .select('*');
+        await api.post('/tareas', taskData);
       }
 
-      const { data, error } = result;
-
-      if (error) throw error;
-
-      const newTaskData = data[0];
-      const proyecto = proyectos.find(p => p.id === newTaskData.proyectoid);
-      const newTask = {
-        ...newTaskData,
-        id: newTaskData.tareaid,
-        nombre_proyecto: proyecto ? proyecto.nombreproyecto : 'N/A'
-      };
-
-      if (editingTask) {
-        setTareas(tareas.map(t => t.id === editingTask.id ? newTask : t));
-      } else {
-        setTareas([...tareas, newTask]);
-      }
+      const tareasData = await api.get('/tareas');
+      setTareas(tareasData.map(t => ({
+          ...t,
+          id: t.tareaid,
+          nombre_proyecto: t.proyectos ? t.proyectos.nombreproyecto : 'N/A'
+      })));
 
       handleModalClose();
     } catch (error) {
@@ -127,7 +97,9 @@ export default function GestionTareas() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Gestión de Tareas</h2>
-        <button className="btn btn-primary" onClick={handleAdd}>Añadir Tarea</button>
+        <button className="btn btn-primary d-inline-flex align-items-center gap-2" onClick={handleAdd}>
+          <PlusCircle size={18} /> Añadir Tarea
+        </button>
       </div>
       <div className="mb-3">
         <input

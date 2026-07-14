@@ -2,6 +2,7 @@ import React from 'react';
 import { useDashboardData } from '../hooks/useDashboardData';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { es } from 'date-fns/locale/es';
+import { Download, Clock, Users, Briefcase, Target } from 'lucide-react';
 
 import KpiCard from '../components/dashboard/KpiCard';
 import ProductivityGauge from '../components/dashboard/ProductivityGauge';
@@ -134,11 +135,11 @@ const PanelDeControl = () => {
                         {/* Download Button */}
                         <div className="col-12 col-md-auto align-self-end">
                             <button 
-                                className="btn btn-primary w-100"
+                                className="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2"
                                 onClick={() => downloadCsv(chartData.vista_reporte_completo, `reporte_filtrado.csv`)}
                                 disabled={!chartData.vista_reporte_completo || chartData.vista_reporte_completo.length === 0}
                             >
-                                Descargar CSV 📄
+                                <Download size={18} /> Descargar CSV
                             </button>
                         </div>
                     </div>
@@ -148,16 +149,16 @@ const PanelDeControl = () => {
             {/* KPI Cards Section */}
             <div className="row g-4 mb-4">
                 <div className="col-12 col-sm-6 col-lg-3">
-                    <KpiCard title="Total Horas Registradas" value={kpiData.totalHoras} icon="⏱️" />
+                    <KpiCard title="Total Horas Registradas" value={kpiData.totalHoras} icon={<Clock size={28} className="text-primary" />} />
                 </div>
                 <div className="col-12 col-sm-6 col-lg-3">
-                    <KpiCard title="Empleados Activos" value={kpiData.empleadosActivos} icon="👥" />
+                    <KpiCard title="Empleados Activos" value={kpiData.empleadosActivos} icon={<Users size={28} className="text-primary" />} />
                 </div>
                 <div className="col-12 col-sm-6 col-lg-3">
-                    <KpiCard title="Proyectos Activos" value={kpiData.proyectosActivos} icon="💼" />
+                    <KpiCard title="Proyectos Activos" value={kpiData.proyectosActivos} icon={<Briefcase size={28} className="text-primary" />} />
                 </div>
                 <div className="col-12 col-sm-6 col-lg-3">
-                    <KpiCard title="% Productividad Promedio" value={`${kpiData.productividadPromedio}%`} icon="🎯" />
+                    <KpiCard title="% Productividad Promedio" value={`${kpiData.productividadPromedio}%`} icon={<Target size={28} className="text-primary" />} />
                 </div>
             </div>
 

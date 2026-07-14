@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient';
+import api from '../../api';
 import AdminTable from '../../components/common/AdminTable';
 import AdminModal from '../../components/common/AdminModal';
 import UnifiedForm from '../../components/forms/UnifiedForm';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { PlusCircle } from 'lucide-react';
 
 export default function GestionEmpleados() {
   const [empleados, setEmpleados] = useState([]);
@@ -17,13 +18,7 @@ export default function GestionEmpleados() {
     async function fetchEmpleados() {
       try {
         setLoading(true);
-        const { data, error } = await supabase
-          .from('empleados')
-          .select('empleadoid, nombrecompleto, activo, departamentoid, puestoid, departamentos(nombredepto), puestos(nombrepuesto)');
-        
-        if (error) {
-          throw error;
-        }
+        const data = await api.get('/empleados');
 
         const empleadosConRelaciones = data.map(e => ({
             ...e,
@@ -50,29 +45,17 @@ export default function GestionEmpleados() {
 
   const handleToggleActive = async (empleado) => {
     try {
-      const { data, error } = await supabase
-        .from('empleados')
-        .update({ activo: !empleado.activo })
-        .eq('empleadoid', empleado.empleadoid)
-        .select('empleadoid, nombrecompleto, activo, departamentoid, puestoid, departamentos(nombredepto), puestos(nombrepuesto)')
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      const updatedEmpleadoConRelaciones = {
-        ...data,
-        id: data.empleadoid,
-        nombre_departamento: data.departamentos ? data.departamentos.nombredepto : 'N/A',
-        nombre_puesto: data.puestos ? data.puestos.nombrepuesto : 'N/A'
-      };
-
-      setEmpleados(
-        empleados.map((e) =>
-          e.empleadoid === empleado.empleadoid ? updatedEmpleadoConRelaciones : e
-        )
-      );
+      await api.put(`/empleados/${empleado.empleadoid}`, { activo: !empleado.activo });
+      // Recargar la lista para tener las relaciones actualizadas
+      const data = await api.get('/empleados');
+      
+      const empleadosConRelaciones = data.map(e => ({
+          ...e,
+          id: e.empleadoid,
+          nombre_departamento: e.departamentos ? e.departamentos.nombredepto : 'N/A',
+          nombre_puesto: e.puestos ? e.puestos.nombrepuesto : 'N/A'
+      }));
+      setEmpleados(empleadosConRelaciones);
     } catch (error) {
       console.error('Error toggling employee active state:', error);
       setError(error.message);
@@ -101,43 +84,22 @@ export default function GestionEmpleados() {
         activo: activo || false, // Default a false si no está definido
       };
 
-      let result;
       if (editingEmpleado) {
-        // Update
-        result = await supabase
-          .from('empleados')
-          .update(empleadoData)
-          .eq('empleadoid', editingEmpleado.empleadoid)
-          .select('empleadoid, nombrecompleto, activo, departamentoid, puestoid, departamentos(nombredepto), puestos(nombrepuesto)')
-          .single();
+        await api.put(`/empleados/${editingEmpleado.empleadoid}`, empleadoData);
       } else {
-        // Insert
-        result = await supabase
-          .from('empleados')
-          .insert(empleadoData)
-          .select('empleadoid, nombrecompleto, activo, departamentoid, puestoid, departamentos(nombredepto), puestos(nombrepuesto)')
-          .single();
+        await api.post('/empleados', empleadoData);
       }
 
-      const { data: updatedEmpleado, error } = result;
-
-      if (error) {
-        throw error;
-      }
+      // Recargar la lista para tener las relaciones actualizadas
+      const data = await api.get('/empleados');
+      const empleadosConRelaciones = data.map(e => ({
+          ...e,
+          id: e.empleadoid,
+          nombre_departamento: e.departamentos ? e.departamentos.nombredepto : 'N/A',
+          nombre_puesto: e.puestos ? e.puestos.nombrepuesto : 'N/A'
+      }));
+      setEmpleados(empleadosConRelaciones);
       
-      const empleadoConRelaciones = {
-        ...updatedEmpleado,
-        id: updatedEmpleado.empleadoid,
-        nombre_departamento: updatedEmpleado.departamentos ? updatedEmpleado.departamentos.nombredepto : 'N/A',
-        nombre_puesto: updatedEmpleado.puestos ? updatedEmpleado.puestos.nombrepuesto : 'N/A'
-      };
-
-      if (editingEmpleado) {
-        setEmpleados(empleados.map(e => e.empleadoid === editingEmpleado.empleadoid ? empleadoConRelaciones : e));
-      } else {
-        setEmpleados([...empleados, empleadoConRelaciones]);
-      }
-
       handleModalClose();
     } catch (error) {
       console.error('Error saving employee:', error);
@@ -165,8 +127,8 @@ export default function GestionEmpleados() {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Gestión de Empleados</h2>
-        <button className="btn btn-primary" onClick={handleAdd}>
-          Añadir Empleado
+        <button className="btn btn-primary d-inline-flex align-items-center gap-2" onClick={handleAdd}>
+          <PlusCircle size={18} /> Añadir Empleado
         </button>
       </div>
       <div className="mb-3">

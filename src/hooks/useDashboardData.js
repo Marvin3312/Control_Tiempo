@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import api from '../api';
 
 const getInitialDates = () => {
     const endDate = new Date();
@@ -129,15 +129,15 @@ export const useDashboardData = () => {
             // Fetch filter options if not already fetched
             if (filterOptions.empleados.length === 0) {
                 const [empleadosRes, clientesRes, proyectosRes] = await Promise.all([
-                    supabase.from('empleados').select('empleadoid, nombrecompleto'),
-                    supabase.from('clientes').select('clienteid, nombrecliente'),
-                    supabase.from('proyectos').select('proyectoid, nombreproyecto'),
+                    api.get('/empleados'),
+                    api.get('/clientes'),
+                    api.get('/proyectos'),
                 ]);
 
                 setFilterOptions({
-                    empleados: empleadosRes.data || [],
-                    clientes: clientesRes.data || [],
-                    proyectos: proyectosRes.data || [],
+                    empleados: empleadosRes || [],
+                    clientes: clientesRes || [],
+                    proyectos: proyectosRes || [],
                 });
             }
 
@@ -150,11 +150,7 @@ export const useDashboardData = () => {
                 proyecto_id_filtro: proyectoFiltroId ? parseInt(proyectoFiltroId) : null
             };
 
-            const { data: reporteData, error: reporteError } = await supabase.rpc('obtener_reporte_filtrado', rpcParams);
-
-            if (reporteError) {
-                throw new Error(`Error al cargar reporte: ${reporteError.message}`);
-            }
+            const reporteData = await api.post('/reporte-filtrado', rpcParams);
 
             // Process data for charts and KPIs
             const processedData = processRpcData(reporteData);

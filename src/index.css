@@ -1,128 +1,210 @@
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap');
+
 :root {
-  --color-background: #F2F2F2;
+  /* Original Colors */
   --color-primary: #049DD9;
-  --color-secondary: #07B2D9;
+  --color-primary-hover: #07B2D9;
   --color-success: #03A61C;
-  --color-accent: #188C29;
-  --color-text: #333333;
-  --color-white: #FFFFFF;
-
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color: var(--color-text);
-  background-color: var(--color-background);
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-success-hover: #188C29;
+  --color-danger: #ea5455;
+  --color-secondary: #82868b;
+  
+  /* Vuexy Inspired Backgrounds & Surfaces */
+  --color-background: #f8f8f9;
+  --color-surface: #ffffff;
+  
+  /* Text Colors */
+  --color-text-main: #5e5873;
+  --color-text-muted: #b9b9c3;
+  --color-text-heading: #5e5873;
+  
+  /* Borders & Shadows */
+  --border-color: #ebe9f1;
+  --card-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
+  --border-radius-sm: 0.358rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 1rem;
+  
+  /* Typography */
+  --font-family: 'Public Sans', sans-serif;
 }
 
 body {
   margin: 0;
   background-color: var(--color-background);
-  color: var(--color-text);
+  color: var(--color-text-main);
+  font-family: var(--font-family);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
-  font-weight: 500;
   color: var(--color-primary);
-  text-decoration: inherit;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
+
 a:hover {
-  color: var(--color-secondary);
+  color: var(--color-primary-hover);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: var(--color-primary);
+  color: var(--color-text-heading);
+  font-weight: 500;
+  margin-top: 0;
 }
 
+/* Base Card Style (Vuexy style) */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--card-shadow);
+  border: none;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+}
+
+/* Buttons */
 button, .btn {
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm);
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  padding: 0.786rem 1.5rem;
+  font-size: 1rem;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-primary {
-    background-color: var(--color-primary);
-    color: var(--color-white);
+  background-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 8px 25px -8px rgba(4, 157, 217, 0.4);
 }
-
 .btn-primary:hover {
-    background-color: var(--color-secondary);
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 8px 25px -8px rgba(7, 178, 217, 0.4);
+  transform: translateY(-1px);
 }
 
 .btn-success {
-    background-color: var(--color-success);
-    color: var(--color-white);
+  background-color: var(--color-success);
+  color: #fff;
+  box-shadow: 0 8px 25px -8px rgba(3, 166, 28, 0.4);
 }
-
 .btn-success:hover {
-    background-color: var(--color-accent);
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: var(--color-white);
+  background-color: var(--color-success-hover);
+  box-shadow: 0 8px 25px -8px rgba(24, 140, 41, 0.4);
+  transform: translateY(-1px);
 }
 
 .btn-danger {
-    background-color: #dc3545;
-    color: var(--color-white);
+  background-color: var(--color-danger);
+  color: #fff;
+  box-shadow: 0 8px 25px -8px rgba(234, 84, 85, 0.4);
+}
+.btn-danger:hover {
+  background-color: #e04445;
+  box-shadow: 0 8px 25px -8px rgba(234, 84, 85, 0.4);
+  transform: translateY(-1px);
 }
 
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+.btn-secondary:hover {
+  background-color: #72767a;
+}
 
-/* Custom styles for TimeTable and TimeRow */
-table {
+/* Form Controls */
+select, input[type="text"], input[type="number"], input[type="date"], input[type="password"], input[type="email"], .form-control {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0, 0.1);
-  border-radius: 8px;
-  overflow: hidden; /* Ensures rounded corners apply to children */
-}
-
-th, td {
-  padding: 12px 15px;
-  border: 1px solid #e0e0e0;
-  text-align: left;
-  font-size: 0.9em;
-}
-
-th {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  font-weight: 600;
-}
-
-tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-tr:hover {
-  background-color: #f1f1f1;
-}
-
-select, input[type="text"], input[type="number"], input[type="date"], .form-control {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box; /* Include padding and border in the element's total width and height */
-  font-size: 0.9em;
+  padding: 0.571rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   font-family: inherit;
+  font-size: 1rem;
 }
 
 select:focus, input:focus, .form-control:focus {
   border-color: var(--color-primary);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(4, 157, 217, 0.2);
+  box-shadow: 0 3px 10px 0 rgba(4, 157, 217, 0.1);
+}
+
+.form-label {
+  display: inline-block;
+  margin-bottom: 0.2857rem;
+  font-size: 0.857rem;
+  color: var(--color-text-main);
+}
+
+/* Tables (Vuexy Style) */
+.table-responsive {
+  overflow-x: auto;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--card-shadow);
+  background: var(--color-surface);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.72rem 2rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: #f3f2f7;
+  color: var(--color-text-heading);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+tr:hover td {
+  background-color: #f9f8f9;
+}
+
+/* Sidebar/Navigation layout helpers if needed */
+.layout-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.layout-sidebar {
+  width: 260px;
+  background: var(--color-surface);
+  box-shadow: 0 0 15px 0 rgba(34,41,47,0.05);
+  z-index: 10;
+}
+
+.layout-content {
+  flex-grow: 1;
+  padding: 2rem;
+}
+
+/* Icons alignment */
+.icon-sm {
+  width: 16px;
+  height: 16px;
+}
+.icon-md {
+  width: 20px;
+  height: 20px;
 }

@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext';
 import { TimeTable } from '../components/timetable/TimeTable';
 import { Notification } from '../components/common/Notification';
 import { FormHeader } from '../components/FormHeader';
+import { PlusCircle, Trash2, Send } from 'lucide-react';
 
 function buildEmptyRows(dayCount = 1, fecha = new Date().toISOString().slice(0, 10)) {
   return Array.from({ length: dayCount }, (_, i) => ({
@@ -162,12 +163,16 @@ function HojaDeTiempo() {
       />
       <div className="mt-3 d-flex justify-content-between">
         <div>
-          <button className="btn btn-secondary" onClick={handleAddRow}>+ Añadir Fila</button>
-          <button className="btn btn-danger ms-2" onClick={handleClear}>Limpiar</button>
+          <button className="btn btn-secondary d-inline-flex align-items-center gap-2" onClick={handleAddRow}>
+            <PlusCircle size={18} /> Añadir Fila
+          </button>
+          <button className="btn btn-danger ms-2 d-inline-flex align-items-center gap-2" onClick={handleClear}>
+            <Trash2 size={18} /> Limpiar
+          </button>
         </div>
         <div>
-          <button className="btn btn-success" onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Enviando...' : 'Enviar Definitivo'}
+          <button className="btn btn-success d-inline-flex align-items-center gap-2" onClick={handleSave} disabled={isSaving}>
+            <Send size={18} /> {isSaving ? 'Enviando...' : 'Enviar Definitivo'}
           </button>
         </div>
       </div>
