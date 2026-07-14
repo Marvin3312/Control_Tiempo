@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../supabaseClient';
+import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import { TimeTable } from '../components/timetable/TimeTable';
 import { Notification } from '../components/common/Notification';
@@ -37,31 +37,16 @@ function HojaDeTiempo() {
   useEffect(() => {
     async function fetchData() {
       // 1. Fetch all clients and projects (for lookups)
-      const { data: clientesData } = await supabase.from('clientes').select('*');
-      if (clientesData) setClientes(clientesData);
+      try {
+        const clientesData = await api.get('/clientes');
+        setClientes(clientesData);
 
-      const { data: proyectosData } = await supabase.from('proyectos').select('*');
-      if (proyectosData) setProyectos(proyectosData);
+        const proyectosData = await api.get('/proyectos');
+        setProyectos(proyectosData);
 
-      // 2. Fetch tasks based on the new logic
-      const { data: oficina } = await supabase
-          .from('proyectos')
-          .select('proyectoid')
-          .eq('referenciacaseware', 'OFICINA-INT')
-          .single();
-
-      const { data: tareasNoCargables } = await supabase
-          .from('tareas')
-          .select('*, proyectos!inner(proyectoid, nombreproyecto, clienteid, referenciacaseware)')
-          .eq('proyectoid', oficina.proyectoid);
-
-      const { data: tareasCargables } = await supabase
-          .from('tareas')
-          .select('*, proyectos!inner(proyectoid, nombreproyecto, clienteid, referenciacaseware)')
-          .neq('proyectoid', oficina.proyectoid);
-      
-      const allTasks = [...(tareasNoCargables || []), ...(tareasCargables || [])];
-      setAllTareas(allTasks);
+        // 2. Fetch all tasks (the backend now includes the 'proyectos' relation)
+        const allTasks = await api.get('/tareas');
+        setAllTareas(allTasks);
 
       // 3. Group tasks for the dropdown
       const grouped = allTasks.reduce((acc, tarea) => {
@@ -86,6 +71,10 @@ function HojaDeTiempo() {
       }, {});
 
       setGroupedTareas(Object.values(grouped));
+      } catch (error) {
+        showNotification('Error al cargar datos iniciales', 'error');
+        console.error(error);
+      }
     }
     fetchData();
   }, []);
@@ -145,14 +134,9 @@ function HojaDeTiempo() {
     }
 
     try {
-      const { error } = await supabase.from('registrosdetiempo').upsert(recordsToSave);
-
-      if (error) {
-        showNotification(`Error al guardar: ${error.message}`, 'error');
-      } else {
-        showNotification('¡Datos guardados con éxito!', 'success');
-        setRows(buildEmptyRows(1, form.periodo));
-      }
+      const response = await api.post('/registros', recordsToSave);
+      showNotification(`¡${response.count || 'Datos'} guardados con éxito!`, 'success');
+      setRows(buildEmptyRows(1, form.periodo));
     } catch (error) {
       showNotification(`Error al guardar: ${error.message}`, 'error');
     } finally {

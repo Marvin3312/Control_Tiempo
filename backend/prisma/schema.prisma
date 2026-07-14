@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model catalogo_tareas {
+  catalogoid        Int     @id @default(autoincrement())
+  tipotrabajoid     Int
+  codigo_tarea      String? @db.VarChar(50)
+  descripcion_tarea String
+  escargable        Boolean @default(true)
+}
+
+model clientes {
+  clienteid       Int      @id @default(autoincrement())
+  nombrecliente   String   @unique @db.VarChar(255)
+  parentclienteid Int?
+  activo          Boolean? @default(true)
+
+  @@index([parentclienteid], map: "idx_cliente_parent")
+}
+
+model departamentos {
+  departamentoid Int    @id @default(autoincrement())
+  nombredepto    String @unique @db.VarChar(100)
+}
+
+model empleados {
+  empleadoid     Int      @id @default(autoincrement())
+  nombrecompleto String   @db.VarChar(255)
+  puestoid       Int
+  departamentoid Int
+  activo         Boolean? @default(true)
+  usuario_id     String?  @db.Uuid
+  role           String?  @default("usuario")
+  email          String?  @unique @db.VarChar(255)
+  password_hash  String?  @db.VarChar(255)
+
+  @@index([departamentoid], map: "idx_empleado_depto")
+  @@index([puestoid], map: "idx_empleado_puesto")
+}
+
+model proyectos {
+  proyectoid         Int      @id @default(autoincrement())
+  clienteid          Int
+  nombreproyecto     String   @db.VarChar(255)
+  periodorevision    String?  @db.VarChar(255)
+  referenciacaseware String?  @unique @db.VarChar(100)
+  tipotrabajoid      Int?
+  activo             Boolean? @default(true)
+
+  @@index([clienteid], map: "idx_proyecto_cliente")
+}
+
+model puestos {
+  puestoid     Int    @id @default(autoincrement())
+  nombrepuesto String @unique @db.VarChar(100)
+}
+
+model registrosdetiempo {
+  registroid         BigInt   @id @default(autoincrement())
+  empleadoid         Int
+  tareaid            Int
+  fecha              DateTime @db.Date
+  horas              Decimal  @db.Decimal(4, 2)
+  notasadicionales   String?
+  clienteid          Int?
+  proyectoid         Int?
+  referenciacaseware String?  @db.VarChar(100)
+
+  @@index([empleadoid], map: "idx_registro_empleado")
+  @@index([fecha], map: "idx_registro_fecha")
+  @@index([tareaid], map: "idx_registro_tarea")
+}
+
+model tareas {
+  tareaid           Int     @id @default(autoincrement())
+  proyectoid        Int
+  descripciontarea  String
+  escargable        Boolean @default(true)
+  categoria_trabajo String? @db.VarChar(100)
+  codigo_tarea      String? @db.VarChar(50)
+
+  @@unique([proyectoid, codigo_tarea], map: "unique_tarea_codigo_proyecto")
+  @@index([proyectoid], map: "idx_tarea_proyecto")
+}
+
+model tipo_de_trabajo {
+  tipotrabajoid  Int    @id @default(autoincrement())
+  departamento   String @db.VarChar(100)
+  nombre_trabajo String @unique @db.VarChar(100)
+}

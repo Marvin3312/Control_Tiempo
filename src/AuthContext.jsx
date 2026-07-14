@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
@@ -11,40 +11,34 @@ export function AuthProvider({ children }) {
   const [loadingProfile, setLoadingProfile] = useState(false);
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
+    const fetchSession = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        setSession({ access_token: token });
+      }
       setLoading(false);
     };
-
-    getSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
+    fetchSession();
   }, []);
 
   useEffect(() => {
     const fetchPerfilEmpleado = async () => {
-      if (session?.user) {
+      if (session) {
         setLoadingProfile(true);
-        const { data, error } = await supabase
-          .from('empleados')
-          .select('*, puestos(nombrepuesto), departamentos(nombredepto)')
-          .eq('usuario_id', session.user.id)
-          .single();
-
-        if (error) {
+        try {
+          const res = await fetch('http://localhost:3000/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${session.access_token}` }
+          });
+          if (!res.ok) throw new Error('Invalid session');
+          const data = await res.json();
+          setPerfilEmpleado(data);
+          setRole(data.role || 'usuario');
+        } catch (error) {
           console.error('Error fetching empleado profile:', error);
           setPerfilEmpleado(null);
           setRole(null);
-        } else {
-          setPerfilEmpleado(data);
-          if (data.role) {
-            setRole(data.role);
-          }
+          localStorage.removeItem('token');
+          setSession(null);
         }
         setLoadingProfile(false);
       } else {
@@ -61,7 +55,13 @@ export function AuthProvider({ children }) {
     perfilEmpleado,
     role,
     loadingProfile,
-    handleLogout: () => supabase.auth.signOut(),
+    setSession,
+    handleLogout: () => {
+      localStorage.removeItem('token');
+      setSession(null);
+      setPerfilEmpleado(null);
+      setRole(null);
+    },
   };
 
   return (

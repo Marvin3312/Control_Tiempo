@@ -39,3 +39,12 @@ funcion.md
 dba.md
 DOCUMENTACION_USUARIO.md
 
+# Archivos de base de datos y respaldos
+*.sql
+*.backup
+db_cluster-*.backup
+temp_schema.sql
+
+# Backend
+backend/.env
+backend/node_modules/

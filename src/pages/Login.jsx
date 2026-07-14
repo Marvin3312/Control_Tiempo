@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
-import { supabase } from '../supabaseClient';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 import { Notification } from '../components/common/Notification';
+import { api } from '../api';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [notification, setNotification] = useState({ message: '', type: '' });
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setSession } = useAuth();
+  
+  const from = location.state?.from?.pathname || "/";
 
   function showNotification(message, type) {
     setNotification({ message, type });
@@ -15,18 +24,24 @@ export default function Login() {
     e.preventDefault();
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithOtp({ email });
-      if (error) throw error;
-      showNotification('¡Revisa tu correo para el enlace de inicio de sesión!', 'success');
+      const data = await api.post('/auth/login', { email, password });
+      
+      localStorage.setItem('token', data.token);
+      setSession({ access_token: data.token });
+      
+      showNotification('Inicio de sesión exitoso', 'success');
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 500);
     } catch (error) {
-      showNotification(error.error_description || error.message, 'error');
+      showNotification(error.message || 'Error al iniciar sesión', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
       <div className="card p-4 shadow-sm" style={{ maxWidth: '400px', width: '100%' }}>
         <Notification 
           message={notification.message} 
@@ -34,7 +49,6 @@ export default function Login() {
           onClose={() => setNotification({ message: '', type: '' })} 
         />
         <h1 className="text-center mb-4">Iniciar Sesión</h1>
-        <p className="text-center mb-4">Ingresa tu email para recibir un enlace mágico de inicio de sesión.</p>
         <form onSubmit={handleLogin}>
           <div className="mb-3">
             <label htmlFor="emailInput" className="form-label">Email</label>
@@ -45,10 +59,23 @@ export default function Login() {
               placeholder="tu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="passwordInput" className="form-label">Contraseña</label>
+            <input
+              id="passwordInput"
+              className="form-control"
+              type="password"
+              placeholder="******"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
           <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-            {loading ? <span>Cargando...</span> : <span>Enviar enlace</span>}
+            {loading ? 'Cargando...' : 'Entrar'}
           </button>
         </form>
       </div>

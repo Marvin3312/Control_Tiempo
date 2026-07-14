@@ -1,0 +1,21 @@
+{
+  "name": "control-tiempo-backend",
+  "version": "1.0.0",
+  "description": "Backend for Control Tiempo",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.3"
+  },
+  "devDependencies": {
+    "prisma": "^6.4.1"
+  }
+}
