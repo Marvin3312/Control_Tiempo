@@ -1,79 +1,95 @@
-.admin-table {
-  width: 100%;
-  margin-bottom: 1rem;
-  color: #212529;
+/* =============================================
+   AdminTable — Estilo Vuexy Premium
+   ============================================= */
+.admin-table-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ebe9f1;
 }
 
-.admin-table th,
-.admin-table td {
-  padding: 0.75rem;
-  vertical-align: top;
-  border-top: 1px solid #dee2e6;
+.admin-table {
+  width: 100%;
+  color: #5e5873;
+  border-collapse: collapse;
 }
 
 .admin-table thead th {
-  vertical-align: bottom;
-  border-bottom: 2px solid #dee2e6;
+  background-color: #f8f8f8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b4b7bd;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #ebe9f1;
+  border-top: none;
 }
 
-.admin-table tbody + tbody {
-  border-top: 2px solid #dee2e6;
+.admin-table tbody td {
+  padding: 0.85rem 1rem;
+  vertical-align: middle;
+  border-top: 1px solid #ebe9f1;
+  font-size: 0.88rem;
 }
 
-.admin-table .table-striped tbody tr:nth-of-type(odd) {
-  background-color: rgba(0, 0, 0, 0.05);
+.admin-table tbody tr:hover {
+  background-color: rgba(115, 103, 240, 0.04);
 }
 
-/* Toggle Switch Styles */
-.switch {
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table-empty {
+  padding: 3rem;
+  text-align: center;
+  color: #b4b7bd;
+  background: #fff;
+  border: 1px solid #ebe9f1;
+  border-radius: 8px;
+}
+
+/* --- Toggle Switch (Active/Inactive) --- */
+.admin-toggle {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 20px;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+  margin: 0;
 }
 
-.switch input {
+.admin-toggle input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.slider {
+.admin-toggle-slider {
   position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border-radius: 20px; /* Make it rounded */
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e0dde8;
+  border-radius: 24px;
+  transition: background 0.25s ease;
 }
 
-.slider:before {
+.admin-toggle-slider:before {
   position: absolute;
   content: "";
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
   background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border-radius: 50%; /* Make it circular */
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
 }
 
-input:checked + .slider {
-  background-color: #28a745; /* Green for active */
+.admin-toggle input:checked + .admin-toggle-slider {
+  background-color: #28c76f;
 }
 
-input:focus + .slider {
-  box-shadow: 0 0 1px #28a745;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(20px);
-  -ms-transform: translateX(20px);
+.admin-toggle input:checked + .admin-toggle-slider:before {
   transform: translateX(20px);
 }

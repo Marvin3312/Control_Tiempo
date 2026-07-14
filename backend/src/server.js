@@ -122,13 +122,49 @@ app.get('/api/clientes', authMiddleware, async (req, res) => {
   }
 });
 
+// Clientes → Proyectos → Tareas (3 niveles, todo en un solo request)
+app.get('/api/clientes-con-proyectos', authMiddleware, async (req, res) => {
+  try {
+    const clientes = await prisma.clientes.findMany({
+      orderBy: { nombrecliente: 'asc' },
+      include: {
+        proyectos: {
+          orderBy: { nombreproyecto: 'asc' },
+          include: {
+            tareas: {
+              orderBy: { descripciontarea: 'asc' }
+            }
+          }
+        }
+      }
+    });
+    res.json(clientes);
+  } catch (error) {
+    console.error('Error GET /api/clientes-con-proyectos:', error);
+    res.status(500).json({ error: 'Error al obtener clientes con proyectos' });
+  }
+});
+
 app.post('/api/clientes', authMiddleware, async (req, res) => {
   try {
-    const cliente = await prisma.clientes.create({ data: req.body });
-    await registrarAuditoria(req, 'CREATE', 'clientes', cliente.clienteid, req.body);
+    const { nombrecliente, parentclienteid, activo } = req.body;
+    if (!nombrecliente || !nombrecliente.trim()) {
+      return res.status(400).json({ error: 'El nombre del cliente es requerido.' });
+    }
+    const data = {
+      nombrecliente: nombrecliente.trim(),
+      activo: activo !== undefined ? activo : true,
+      parentclienteid: parentclienteid ? Number(parentclienteid) : null,
+    };
+    const cliente = await prisma.clientes.create({ data });
+    await registrarAuditoria(req, 'CREATE', 'clientes', cliente.clienteid, data);
     res.json(cliente);
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear cliente' });
+    console.error('Error POST /api/clientes:', error);
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: `Ya existe un cliente con el nombre "${req.body.nombrecliente}". Por favor usa un nombre diferente.` });
+    }
+    res.status(500).json({ error: 'Error al crear cliente', detail: error.message });
   }
 });
 
@@ -171,11 +207,19 @@ app.get('/api/proyectos', authMiddleware, async (req, res) => {
 
 app.post('/api/proyectos', authMiddleware, async (req, res) => {
   try {
-    const proyecto = await prisma.proyectos.create({ data: req.body });
-    await registrarAuditoria(req, 'CREATE', 'proyectos', proyecto.proyectoid, req.body);
+    const { nombreproyecto, clienteid, referenciacaseware, activo } = req.body;
+    const data = {
+      nombreproyecto,
+      clienteid: Number(clienteid),
+      activo: activo !== undefined ? activo : true,
+      referenciacaseware: referenciacaseware && referenciacaseware.trim() !== '' ? referenciacaseware.trim() : null,
+    };
+    const proyecto = await prisma.proyectos.create({ data });
+    await registrarAuditoria(req, 'CREATE', 'proyectos', proyecto.proyectoid, data);
     res.json(proyecto);
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear proyecto' });
+    console.error('Error POST /api/proyectos:', error);
+    res.status(500).json({ error: 'Error al crear proyecto', detail: error.message });
   }
 });
 
@@ -281,12 +325,25 @@ app.get('/api/empleados', authMiddleware, async (req, res) => {
 
 app.post('/api/empleados', authMiddleware, async (req, res) => {
   try {
-    const emp = await prisma.empleados.create({ data: req.body });
-    await registrarAuditoria(req, 'CREATE', 'empleados', emp.empleadoid, req.body);
+    const { nombrecompleto, puestoid, departamentoid, activo, email, password_hash, role } = req.body;
+    const data = {
+      nombrecompleto,
+      puestoid:       Number(puestoid),
+      departamentoid: Number(departamentoid),
+      activo:         activo !== undefined ? activo : true,
+      ...(email        ? { email }        : {}),
+      ...(password_hash? { password_hash }: {}),
+      ...(role         ? { role }         : {}),
+    };
+    const emp = await prisma.empleados.create({ data });
+    await registrarAuditoria(req, 'CREATE', 'empleados', emp.empleadoid, data);
     res.json(emp);
   } catch (error) {
     console.error('Error POST /api/empleados:', error);
-    res.status(500).json({ error: 'Error al crear empleado' });
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'Ya existe un empleado con ese correo electrónico.' });
+    }
+    res.status(500).json({ error: 'Error al crear empleado', detail: error.message });
   }
 });
 
@@ -340,9 +397,9 @@ app.post('/api/reporte-filtrado', authMiddleware, async (req, res) => {
     
     // Para filtrar por cliente y proyecto, necesitamos relaciones. Prisma permite filtrar por relaciones.
     if (proyecto_id_filtro) {
-      where.tarea = { proyectoid: proyecto_id_filtro };
+      where.tareas = { proyectoid: proyecto_id_filtro };
     } else if (cliente_id_filtro) {
-      where.tarea = { proyectos: { clienteid: cliente_id_filtro } };
+      where.tareas = { proyectos: { clienteid: cliente_id_filtro } };
     }
 
     const registros = await prisma.registrosdetiempo.findMany({
@@ -363,7 +420,7 @@ app.post('/api/reporte-filtrado', authMiddleware, async (req, res) => {
 
     const reporteData = registros.map(r => ({
       fecha: r.fecha.toISOString(),
-      horas: r.horas,
+      horas: Number(r.horas),
       empleadoid: r.empleadoid,
       empleado: r.empleados?.nombrecompleto,
       tareaid: r.tareaid,
@@ -411,7 +468,19 @@ app.get('/api/registros', authMiddleware, async (req, res) => {
         empleadoid: Number(empleadoid),
         // Convirtiendo la fecha a ISO si es necesario, asumiendo formato YYYY-MM-DD
         fecha: fecha ? new Date(fecha) : undefined
-      }
+      },
+      include: {
+        tareas: {
+          include: {
+            proyectos: {
+              include: {
+                clientes: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { fecha: 'desc' }
     });
     // Convertir BigInt a string para poder enviarlo como JSON
     const parsed = registros.map(r => ({
@@ -429,11 +498,16 @@ app.post('/api/registros', authMiddleware, async (req, res) => {
   try {
     // Si viene un array, es inserción múltiple
     if (Array.isArray(req.body)) {
-      const data = req.body.map(r => ({
-        ...r,
-        fecha: new Date(r.fecha),
-        horas: Number(r.horas)
-      }));
+      const data = req.body.map(r => {
+        const h = Number(r.horas);
+        if (h > 24) throw new Error(`El número de horas (${h}) excede el máximo permitido (24)`);
+        if (h <= 0) throw new Error("Las horas deben ser mayores a 0");
+        return {
+          ...r,
+          fecha: new Date(r.fecha),
+          horas: h
+        };
+      });
       const created = await prisma.registrosdetiempo.createMany({ data });
       return res.json({ count: created.count });
     }
@@ -468,6 +542,29 @@ app.put('/api/registros/:id', authMiddleware, async (req, res) => {
     res.json({ ...registro, registroid: registro.registroid.toString() });
   } catch (error) {
     res.status(500).json({ error: 'Error al actualizar registro' });
+  }
+});
+
+// ==========================================
+// Auditoría — Log de cambios del sistema
+// ==========================================
+app.get('/api/auditoria', authMiddleware, async (req, res) => {
+  try {
+    const { limit = 100, tabla } = req.query;
+    const where = tabla ? { tabla_afectada: tabla } : {};
+    const registros = await prisma.auditoria.findMany({
+      where,
+      orderBy: { fecha: 'desc' },
+      take: Number(limit),
+      include: { empleados: { select: { nombrecompleto: true } } }
+    });
+    res.json(registros.map(r => ({
+      ...r,
+      usuario: r.empleados?.nombrecompleto || 'Sistema',
+    })));
+  } catch (error) {
+    console.error('Error GET /api/auditoria:', error);
+    res.status(500).json({ error: 'Error al obtener auditoría' });
   }
 });
 

@@ -1,34 +1,87 @@
+/* =============================================
+   Admin Layout — Estilo Vuexy Premium
+   ============================================= */
 .admin-layout {
-  min-height: 100vh;
+  min-height: calc(100vh - 62px);
+  background-color: #f8f8f8;
 }
 
+/* --- Sidebar --- */
 .admin-sidebar {
-  width: 250px;
-  background-color: #e9ecef;
-  border-right: 1px solid #dee2e6;
+  width: 260px;
+  min-width: 260px;
+  background-color: #ffffff;
+  border-right: none;
+  box-shadow: 2px 0 8px rgba(34, 41, 47, 0.08);
+  display: flex;
+  flex-direction: column;
+  padding-top: 1rem;
+  transition: width 0.2s ease;
 }
 
-.admin-sidebar h4 {
-    color: var(--color-primary);
+.admin-sidebar .sidebar-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b4b7bd;
+  padding: 0.75rem 1.5rem 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .admin-sidebar .nav-link {
-  color: var(--color-text);
-  padding: 0.75rem 1.5rem;
-}
-
-.admin-sidebar .nav-link.active {
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  font-weight: bold;
+  color: #6e6b7b;
+  padding: 0.7rem 1.5rem;
+  border-radius: 6px;
+  margin: 2px 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
 .admin-sidebar .nav-link:hover {
-  background-color: #dee2e6;
+  background-color: rgba(115, 103, 240, 0.08);
+  color: var(--color-primary);
 }
 
+.admin-sidebar .nav-link.active {
+  background: linear-gradient(118deg, var(--color-primary), rgba(0, 160, 223, 0.7));
+  color: #fff !important;
+  font-weight: 600;
+  box-shadow: 0 0 10px 1px rgba(0, 160, 223, 0.2);
+}
+
+.admin-sidebar .nav-link.active svg {
+  stroke: #fff;
+}
+
+.admin-sidebar hr {
+  margin: 0.75rem 1.25rem;
+  border-color: #ebe9f1;
+}
+
+/* --- Main Content --- */
 .admin-content {
   flex-grow: 1;
   padding: 2rem;
-  background-color: var(--color-background);
+  background-color: #f8f8f8;
+  overflow-y: auto;
+}
+
+/* --- Page Header inside Admin --- */
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-page-header h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #5e5873;
+  margin: 0;
 }

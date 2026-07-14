@@ -105,8 +105,13 @@ export function TimeRow({
           type="number"
           step="0.25"
           min="0"
+          max="24"
           value={row.horas ?? ''}
-          onChange={(e)=> onChange(index, {...row, horas: e.target.value})}
+          onChange={(e)=> {
+            let val = parseFloat(e.target.value);
+            if (val > 24) e.target.value = 24; // Prevent typing more than 24
+            onChange(index, {...row, horas: e.target.value});
+          }}
           className="form-control"
         />
       </td>

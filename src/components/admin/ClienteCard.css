@@ -1,0 +1,195 @@
+/* ===================================================
+   ClienteCard — 3 niveles: Cliente → Proyecto → Tarea
+   =================================================== */
+
+/* ─── Card container ─── */
+.cliente-card {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #ebe9f1;
+  box-shadow: 0 2px 12px 0 rgba(34, 41, 47, 0.07);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+.cliente-card:hover {
+  box-shadow: 0 4px 20px 0 rgba(34, 41, 47, 0.12);
+}
+.cliente-card--inactive { opacity: 0.65; }
+
+/* ─── Card Header ─── */
+.cliente-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #ebe9f1;
+  background: #fafafa;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cliente-card__info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.cliente-card__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), #42BFF4);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 160, 223, 0.3);
+}
+
+.cliente-card__name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #5e5873;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cliente-card__meta {
+  font-size: 0.78rem;
+  color: #b4b7bd;
+}
+
+.cliente-card__actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Status badges */
+.badge-active {
+  background: #e8f9ee; color: #28c76f;
+  border: 1px solid #c2f0d8;
+  font-size: 0.7rem; font-weight: 600;
+  border-radius: 20px; padding: 3px 10px;
+}
+.badge-inactive {
+  background: #fef0f0; color: #ea5455;
+  border: 1px solid #fcd4d4;
+  font-size: 0.7rem; font-weight: 600;
+  border-radius: 20px; padding: 3px 10px;
+}
+
+/* ─── Empty state ─── */
+.cliente-card__empty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.1rem 1.25rem;
+  color: #b4b7bd;
+  font-size: 0.85rem;
+}
+.cliente-card__empty .btn-link {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+}
+
+/* ─── Projects area ─── */
+.cliente-card__projects { padding: 0; }
+
+/* ─── Shared Table ─── */
+.proyecto-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.proyecto-table thead th {
+  background: #f8f8f8;
+  color: #b4b7bd;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid #ebe9f1;
+}
+
+/* ─── Project rows ─── */
+.proyecto-row td {
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid #ebe9f1;
+  vertical-align: middle;
+  background: #fff;
+}
+.proyecto-row:hover td { background: rgba(115,103,240,0.04); }
+
+.proyecto-expand-cell { width: 36px; text-align: center; }
+
+.proyecto-name {
+  font-weight: 600;
+  color: #5e5873;
+  font-size: 0.875rem;
+}
+
+.proyecto-code {
+  color: #b4b7bd;
+  font-size: 0.78rem;
+  font-family: monospace;
+}
+
+/* ─── Task rows (indented) ─── */
+.tarea-row td {
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid #f3f2f7;
+  vertical-align: middle;
+  background: #fdfdff;
+  font-size: 0.83rem;
+}
+.tarea-row:hover td { background: rgba(115,103,240,0.03); }
+.tarea-row:last-child td { border-bottom: 1px solid #ebe9f1; }
+
+.tarea-name {
+  color: #6e6b7b;
+  padding-left: 2rem !important;
+}
+
+/* ─── Task type badges ─── */
+.badge-count {
+  background: rgba(115,103,240,0.1);
+  color: var(--color-primary);
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 2px 7px;
+}
+
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 2px 8px;
+}
+.badge-cargable {
+  background: #e8f9ee; color: #28c76f;
+}
+.badge-no-cargable {
+  background: #fff3e0; color: #ff9f43;
+}
+
+/* ─── Inactive rows ─── */
+.row-inactive td { opacity: 0.5; }
+
+/* ─── XS Button variant ─── */
+.btn-xs {
+  padding: 2px 6px;
+  font-size: 0.72rem;
+  border-radius: 4px;
+  line-height: 1.5;
+}

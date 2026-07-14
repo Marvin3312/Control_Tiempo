@@ -18,12 +18,10 @@ import RutaProtegida from './components/auth/RutaProtegida';
 import RutaProtegidaAdmin from './components/auth/RutaProtegidaAdmin';
 import RutaProtegidaManager from './components/auth/RutaProtegidaManager';
 
-// Admin Page Imports
-import GestionClientes from './pages/admin/GestionClientes';
-import GestionProyectos from './pages/admin/GestionProyectos';
-import GestionTareas from './pages/admin/GestionTareas';
+// Admin Pages — solo los que permanecen independientes
+import GestionClientes from './pages/admin/GestionClientes';   // Incluye Proyectos y Tareas
 import GestionEmpleados from './pages/admin/GestionEmpleados';
-import UnifiedFormTest from './pages/admin/UnifiedFormTest';
+import Auditoria from './pages/admin/Auditoria';
 
 export default function App() {
   return (
@@ -35,8 +33,8 @@ export default function App() {
           <Route path="/acceso-denegado" element={<AccesoDenegado />} />
 
           {/* Main App Routes */}
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               <RutaProtegida>
                 <LayoutPrincipal />
@@ -58,8 +56,8 @@ export default function App() {
           </Route>
 
           {/* Admin Routes */}
-          <Route 
-            path="/admin" 
+          <Route
+            path="/admin"
             element={
               <RutaProtegidaAdmin>
                 <AdminLayout />
@@ -67,11 +65,10 @@ export default function App() {
             }
           >
             <Route index element={<Navigate to="clientes" replace />} />
+            {/* Clientes unifica Proyectos y Tareas en una sola vista jerárquica */}
             <Route path="clientes" element={<GestionClientes />} />
-            <Route path="proyectos" element={<GestionProyectos />} />
-            <Route path="tareas" element={<GestionTareas />} />
             <Route path="empleados" element={<GestionEmpleados />} />
-            <Route path="unified-form-test" element={<UnifiedFormTest />} />
+            <Route path="auditoria" element={<Auditoria />} />
           </Route>
 
           {/* Not Found Route */}

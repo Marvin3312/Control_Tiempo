@@ -1,28 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Original Colors */
-  --color-primary: #049DD9;
-  --color-primary-hover: #07B2D9;
-  --color-success: #03A61C;
-  --color-success-hover: #188C29;
+  /* RSM Corporate Colors */
+  --color-primary: #00A0DF; /* RSM Blue */
+  --color-primary-hover: #0087BD;
+  --color-success: #4CAA42; /* RSM Green */
+  --color-success-hover: #3E8D35;
   --color-danger: #ea5455;
-  --color-secondary: #82868b;
+  --color-danger-hover: #e34142;
+  --color-secondary: #97999B; /* RSM Light Gray */
+  --color-secondary-hover: #808285;
   
-  /* Vuexy Inspired Backgrounds & Surfaces */
-  --color-background: #f8f8f9;
+  /* Vuexy Backgrounds & Surfaces */
+  --color-background: #f8f8f8;
   --color-surface: #ffffff;
   
   /* Text Colors */
-  --color-text-main: #5e5873;
+  --color-text-main: #696A6D; /* RSM Dark Gray */
   --color-text-muted: #b9b9c3;
   --color-text-heading: #5e5873;
   
   /* Borders & Shadows */
   --border-color: #ebe9f1;
+  --input-border-color: #d8d6de;
   --card-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
+  --btn-shadow: 0 8px 25px -8px;
+  
+  /* Radii */
   --border-radius-sm: 0.358rem;
-  --border-radius-md: 0.5rem;
+  --border-radius-md: 0.428rem;
   --border-radius-lg: 1rem;
   
   /* Typography */
@@ -31,9 +37,9 @@
 
 body {
   margin: 0;
-  background-color: var(--color-background);
-  color: var(--color-text-main);
-  font-family: var(--font-family);
+  background-color: var(--color-background) !important;
+  color: var(--color-text-main) !important;
+  font-family: var(--font-family) !important;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -57,154 +63,155 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Base Card Style (Vuexy style) */
 .card {
-  background: var(--color-surface);
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--card-shadow);
-  border: none;
+  background: var(--color-surface) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--card-shadow) !important;
+  border: none !important;
   margin-bottom: 2rem;
-  padding: 1.5rem;
 }
 
-/* Buttons */
-button, .btn {
-  border-radius: var(--border-radius-sm);
-  border: 1px solid transparent;
-  padding: 0.786rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* Base button cleanup */
+.btn {
+  border-radius: var(--border-radius-sm) !important;
+  font-family: var(--font-family) !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease-in-out !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   gap: 0.5rem;
+  padding: 0.786rem 1.5rem !important;
 }
 
+/* Primary Button */
 .btn-primary {
-  background-color: var(--color-primary);
-  color: #fff;
-  box-shadow: 0 8px 25px -8px rgba(4, 157, 217, 0.4);
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 4px 0 rgba(115, 103, 240, 0.4) !important;
 }
 .btn-primary:hover {
-  background-color: var(--color-primary-hover);
-  box-shadow: 0 8px 25px -8px rgba(7, 178, 217, 0.4);
-  transform: translateY(-1px);
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  box-shadow: 0 8px 25px -8px rgba(115, 103, 240, 0.7) !important;
+  transform: translateY(-2px) !important;
 }
 
+/* Success Button */
 .btn-success {
-  background-color: var(--color-success);
-  color: #fff;
-  box-shadow: 0 8px 25px -8px rgba(3, 166, 28, 0.4);
+  background-color: var(--color-success) !important;
+  border-color: var(--color-success) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 4px 0 rgba(40, 199, 111, 0.4) !important;
 }
 .btn-success:hover {
-  background-color: var(--color-success-hover);
-  box-shadow: 0 8px 25px -8px rgba(24, 140, 41, 0.4);
-  transform: translateY(-1px);
+  background-color: var(--color-success-hover) !important;
+  border-color: var(--color-success-hover) !important;
+  box-shadow: 0 8px 25px -8px rgba(40, 199, 111, 0.7) !important;
+  transform: translateY(-2px) !important;
 }
 
+/* Danger Button */
 .btn-danger {
-  background-color: var(--color-danger);
-  color: #fff;
-  box-shadow: 0 8px 25px -8px rgba(234, 84, 85, 0.4);
+  background-color: var(--color-danger) !important;
+  border-color: var(--color-danger) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 4px 0 rgba(234, 84, 85, 0.4) !important;
 }
 .btn-danger:hover {
-  background-color: #e04445;
-  box-shadow: 0 8px 25px -8px rgba(234, 84, 85, 0.4);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background-color: var(--color-secondary);
-  color: #fff;
-}
-.btn-secondary:hover {
-  background-color: #72767a;
+  background-color: var(--color-danger-hover) !important;
+  border-color: var(--color-danger-hover) !important;
+  box-shadow: 0 8px 25px -8px rgba(234, 84, 85, 0.7) !important;
+  transform: translateY(-2px) !important;
 }
 
 /* Form Controls */
-select, input[type="text"], input[type="number"], input[type="date"], input[type="password"], input[type="email"], .form-control {
-  width: 100%;
-  padding: 0.571rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-  background-color: var(--color-surface);
-  color: var(--color-text-main);
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  font-family: inherit;
-  font-size: 1rem;
+.form-control, .form-select {
+  border: 1px solid var(--input-border-color) !important;
+  border-radius: var(--border-radius-sm) !important;
+  padding: 0.571rem 1rem !important;
+  font-family: var(--font-family) !important;
+  font-size: 1rem !important;
+  color: var(--color-text-main) !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
 }
 
-select:focus, input:focus, .form-control:focus {
-  border-color: var(--color-primary);
-  outline: none;
-  box-shadow: 0 3px 10px 0 rgba(4, 157, 217, 0.1);
+.form-control:focus, .form-select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1) !important;
 }
 
 .form-label {
-  display: inline-block;
-  margin-bottom: 0.2857rem;
-  font-size: 0.857rem;
-  color: var(--color-text-main);
+  color: var(--color-text-main) !important;
+  font-size: 0.857rem !important;
+  margin-bottom: 0.2857rem !important;
 }
 
-/* Tables (Vuexy Style) */
+/* TABLE STYLING - VUEXY */
 .table-responsive {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
   overflow-x: auto;
-  border-radius: var(--border-radius-md);
-  box-shadow: var(--card-shadow);
-  background: var(--color-surface);
 }
 
-table {
-  width: 100%;
+.table {
+  color: var(--color-text-main) !important;
   border-collapse: collapse;
 }
 
-th, td {
-  padding: 0.72rem 2rem;
-  vertical-align: middle;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 0.95rem;
-}
-
-th {
-  background-color: #f3f2f7;
-  color: var(--color-text-heading);
-  font-weight: 600;
+.table th {
+  background-color: #f3f2f7 !important;
+  color: var(--color-text-heading) !important;
   text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
+  font-size: 0.85rem !important;
+  letter-spacing: 1px;
+  font-weight: 600 !important;
+  padding: 0.72rem 1.5rem !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  border-top: none !important;
 }
 
-tr:hover td {
-  background-color: #f9f8f9;
+.table td {
+  padding: 0.72rem 1.5rem !important;
+  vertical-align: middle !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  border-top: none !important;
 }
 
-/* Sidebar/Navigation layout helpers if needed */
-.layout-wrapper {
-  display: flex;
-  min-height: 100vh;
+.table tbody tr:hover td {
+  background-color: rgba(115, 103, 240, 0.04) !important;
 }
 
-.layout-sidebar {
-  width: 260px;
-  background: var(--color-surface);
-  box-shadow: 0 0 15px 0 rgba(34,41,47,0.05);
-  z-index: 10;
+/* IN-TABLE INPUTS (clean integration) */
+.table td .form-control, 
+.table td .form-select {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  padding: 0.5rem !important;
+  height: auto !important;
+  box-shadow: none !important;
 }
 
-.layout-content {
-  flex-grow: 1;
-  padding: 2rem;
+.table td .form-control:hover, 
+.table td .form-select:hover,
+.table td .form-control:focus, 
+.table td .form-select:focus {
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-surface) !important;
 }
 
-/* Icons alignment */
-.icon-sm {
-  width: 16px;
-  height: 16px;
+/* Modals */
+.modal-content {
+  border-radius: 8px !important;
+  border: none !important;
+  box-shadow: 0 5px 20px 0 rgba(34, 41, 47, 0.1) !important;
 }
-.icon-md {
-  width: 20px;
-  height: 20px;
+
+.modal-header {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-color) !important;
 }

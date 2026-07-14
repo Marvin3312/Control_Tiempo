@@ -1,4 +1,93 @@
+/* =============================================
+   UnifiedForm — Estilo Vuexy Premium
+   ============================================= */
 .unified-form {
-  max-width: 500px;
-  margin: auto;
+  padding: 0.5rem 0;
+}
+
+/* 2-column grid */
+.uf-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.25rem;
+}
+
+.uf-col-full  { grid-column: span 2; }
+.uf-col-half  { grid-column: span 1; }
+
+.uf-field {}
+
+.uf-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #5e5873;
+  margin-bottom: 0.35rem;
+}
+
+/* --- Checkbox row (switch) --- */
+.uf-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.uf-checkbox-label {
+  font-size: 0.88rem;
+  color: #6e6b7b;
+  font-weight: 500;
+}
+
+/* --- Premium Switch Toggle --- */
+.uf-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.uf-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.uf-switch-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e0dde8;
+  border-radius: 26px;
+  transition: background 0.25s ease;
+}
+
+.uf-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.uf-switch input:checked + .uf-switch-slider {
+  background-color: var(--color-primary);
+}
+
+.uf-switch input:checked + .uf-switch-slider:before {
+  transform: translateX(20px);
+}
+
+/* --- Submit button row --- */
+.uf-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
 }
